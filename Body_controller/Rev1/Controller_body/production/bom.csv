@@ -1,0 +1,11 @@
+Designator,Footprint,Quantity,Value,LCSC Part #
+"Bolt1, Bolt2, Bolt3",M3_Bolt,3,~,
+J1,TE_84953-6_1x06-1MP_P1.0mm_Horizontal,1,Conn_01x06_Socket,
+J2,PinHeader_1x03_P2.54mm_Horizontal,1,Conn_01x03_Socket,
+"R1, R10, R11, R12, R13, R2, R3, R4, R7, R8, R9",805,11,100k,
+"R5, R6",805,2,10k,
+SW1,GSMR_16,1,~,
+SW2,GSMR_10S,1,~,
+SW3,Direction3 Pin5,1,~,
+U1,SOP65P640X120-24N,1,PCF8575PWR,
+U2,OLED 0.96 i2c,1,~,

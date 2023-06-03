@@ -1,0 +1,6 @@
+Ref,Val,Package,PosX,PosY,Rot,Side
+"D2","SFH2430","Osram_SFH2430",16.250000,19.800000,180.000000,bottom
+"U4","OPTICAL-TSL2561T(6P-3.8X2.6MM)","TMB6-1.55-3.8X2.6MM",16.250000,19.800000,90.000000,bottom
+"Z1","~","Selector_default",11.633200,15.950800,0.000000,bottom
+"Z2","~","Selector_default",77.600000,20.500000,90.000000,bottom
+"Z3","~","Selector_default",71.577200,20.017200,90.000000,bottom
