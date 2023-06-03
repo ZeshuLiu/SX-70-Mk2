@@ -8,9 +8,16 @@ This is an open sourced Polaroid SX-70 instant camera core board with the Raspbe
 The structure of the repository:\
 本项目仓库的结构：
 
-1. The [Sonar](https://github.com/LiuZSChina/OPSX/tree/master/Sonnar) file contains design for sonnar sx-70.See README.md inside this folder for details.\
-[Original](https://github.com/LiuZSChina/OPSX/tree/master/Original)文件夹内是新设计的适用于声呐对焦的sx70核心板及附件，文件夹内具体项目的作用详见文件夹内的README.md。
-
+1. The [opsx_x](https://github.com/LiuZSChina/OPSX/tree/master/Sonnar) file contains design for sonnar sx-70.Designed using KiCad.\
+[opsx_x](https://github.com/LiuZSChina/OPSX-Sonnar/tree/main/opsx_x)文件夹内是新设计的适用于声呐对焦的sx70核心板，使用KiCad绘制。
+2. The [code](https://github.com/LiuZSChina/OPSX-Sonnar/tree/main/code) Code for main board.\
+[code](https://github.com/LiuZSChina/OPSX-Sonnar/tree/main/code)所有的代码。
+3. The [Flash_Plug](https://github.com/LiuZSChina/OPSX-Sonnar/tree/main/Flash_Plug) Flash adapter to 2.5mm and 3.5mm flash cable.\
+[Flash_Plug](https://github.com/LiuZSChina/OPSX-Sonnar/tree/main/Flash_Plug)2.5mm和3.5mm闪光灯连接线的转接板。
+4. The [Body_controller](https://github.com/LiuZSChina/OPSX-Sonnar/tree/main/Body_controller) Controller fixed on camera body.\
+[Body_controller](https://github.com/LiuZSChina/OPSX-Sonnar/tree/main/Body_controller) 固定在机身上的外接控制板。
+5. The [Fabrication](https://github.com/LiuZSChina/OPSX-Sonnar/tree/main/Fabrication) Latest files for fabrication.\
+[Fabrication](https://github.com/LiuZSChina/OPSX-Sonnar/tree/main/Fabrication) 制造所需要的文件，均为各个组件的最新版本。
 
 ## Table of Contents 目录
 
