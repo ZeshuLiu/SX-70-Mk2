@@ -618,7 +618,7 @@ def Cam_Operation():
                 elif enc == 'T':
                     sec_enc = read_sec_plug_enc()
                     """
-                    todo T mode selectable
+                    !TODO T mode selectable
                     """
                     shut_mode = 'T'
                     St = ev11
