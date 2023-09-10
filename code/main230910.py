@@ -1,6 +1,5 @@
 """
 正常调试版本，适合组装后使用
-直接命名为main.py然后上传进板子的flash里就行
 """
 from machine import Pin,PWM,ADC,I2C
 import tsl2561,time,ssd1306,pcf8575
@@ -24,7 +23,6 @@ have_disp = False
 encoder_addr = 32
 have_enc = False
 enc_pins = [4,5,6,7]
-sec_enc_pins = [0,1,2,3]
 # Code Start at "#End of Config"
 
 # Config Output Pins <See Pins.xls>
@@ -63,17 +61,6 @@ EC_D = '0100'
 EC_E = '1000'
 EC_F = '0000'
 
-SEC_EC_ZERO = '1111'
-SEC_EC_ONE = '0111'
-SEC_EC_TWO = '1011'
-SEC_EC_THREE = '0011'
-SEC_EC_FOUR = '1101'
-SEC_EC_FIVE = '0101'
-SEC_EC_SIX = '1001'
-SEC_EC_SEVEN = '0001'
-SEC_EC_EIGHT = '1110'
-SEC_EC_NINE = '0110'
-
 # Config ShutterDelay  sht(1/n) or sht(n)s
 ev7 = 600
 ev75 = 440
@@ -100,15 +87,15 @@ ShutterSpeedHuman = {ev7:'1/2', ev75:'1/3', ev8:'1/4', ev85:'1/6', ev9:'1/8', ev
 #a=sht1000
 #End of Config
 
-def read_enc(enc_p=enc_pins):
+def read_enc():
     result = ""
-    for i in enc_p:
+    for i in enc_pins:
         result += str(pcf.pin(i))
     #print(result,pcf.pin(1))
     return result
 
 def plug_encoder():
-    ec = read_enc(enc_pins)
+    ec = read_enc()
     #ec = EC_ZERO #delete
     #print(ec)
     if ec == EC_ZERO:
@@ -118,9 +105,8 @@ def plug_encoder():
         display.text('B', 23, 2, 0)
         return 'B'
     elif ec == EC_TWO:
-        # display.text('T', 23, 2, 0)
-        return read_sec_plug_enc()
-    
+        display.text('T', 23, 2, 0)
+        return 'T'
     elif ec == EC_THREE:
         display.text('1/2', 15, 2, 0)
         return ev7
@@ -160,43 +146,7 @@ def plug_encoder():
     elif ec == EC_F:
         display.text('1/1000', 1, 2, 0)
         return ev16
-
-# todo 
-def read_sec_plug_enc():
-    ec = read_enc(sec_enc_pins)
-    # print('Sec Enc:', ec)
-    one_sec = 1000
-    one_min = one_sec*60
-    if ec == SEC_EC_ZERO:
-        display.text('T', 10, 2, 0)
-        return 'T'
-    elif ec == SEC_EC_ONE:
-        display.text('T1S', 23, 2, 0)
-        return 1*one_sec
-    elif ec == SEC_EC_TWO:
-        display.text('T2S', 23, 2, 0)
-        return 2*one_sec
-    elif ec == SEC_EC_THREE:
-        display.text('T4S', 15, 2, 0)
-        return 4*one_sec
-    elif ec == SEC_EC_FOUR:
-        display.text('T8S', 15, 2, 0)
-        return 8*one_sec
-    elif ec == SEC_EC_FIVE:
-        display.text('T15S', 15, 2, 0)
-        return 15*one_sec
-    elif ec == SEC_EC_SIX:
-        display.text('T30S', 15, 2, 0)
-        return 30*one_sec
-    elif ec == SEC_EC_SEVEN:
-        display.text('T1M', 10, 2, 0)
-        return 1*one_min
-    elif ec == SEC_EC_EIGHT:
-        display.text('T2M', 10, 2, 0)
-        return 2*one_min
-    elif ec == SEC_EC_NINE:
-        display.text('T4M', 10, 2, 0)
-        return 4*one_min
+    
 def showFrame():
     display.fill(0)
     display.fill_rect(0, 0, 128, 11, 1)
@@ -306,7 +256,7 @@ def camera_init():
         
         display = ssd1306.SSD1306_I2C(128, 32, plugI2c,addr=display_addr) # 设置宽度，高度和I2C通信
         have_disp = True
-        display.contrast(1)
+        display.contrast(0)
         print("have disp")
         showFrame()
         display.text('OFF', 94, 2, 0)
@@ -431,16 +381,7 @@ def shut(Shutter_Delay, f="1"):
     elif f == '1': #Normal
         if _CAMERA_DBG_:
             print("Normal Mode!")
-        start = time.ticks_ms()
-        if _CAMERA_DBG_:
-            print("Start at", start)
-
-        while time.ticks_ms() - start < Shutter_Delay:
-            continue
-        
-        # time.sleep_ms(Shutter_Delay)
-        if _CAMERA_DBG_:
-            print("End at", time.ticks_ms(), "Dura", time.ticks_ms()-start)
+        time.sleep_ms(Shutter_Delay)
     
     elif f == 'B': #B mode
         if _CAMERA_DBG_:
@@ -583,7 +524,9 @@ def Cam_Operation():
                         #display.text('Shutter open until button release', 8, 23)
                         display.text('Not Support', 8, 23)
                     continue
-
+                """
+                todo: Speed Over Dirve
+                """
                 if have_disp:
                     display.text('FLASH', 86, 2, 0)
                     display.text('1/30', 10, 2, 0)
@@ -624,13 +567,8 @@ def Cam_Operation():
                         display.fill_rect(0,12,128,52,0)
                         #display.text('Shutter open until button release', 8, 23)
                         display.text('Open When Press', 8, 23)
-                
                 # Select T Mode
-                elif enc == 'T' :
-                    #sec_enc = read_sec_plug_enc()
-                    """
-                    !TODO T mode selectable
-                    """
+                elif enc == 'T':
                     shut_mode = 'T'
                     St = ev11
                     if not have_enc and have_disp:
@@ -642,19 +580,6 @@ def Cam_Operation():
                         #display.text('Shutter open until button release', 8, 23)
                         display.text('Press to Stop', 8, 23)
                 
-                # Long exposure mode
-                elif enc > ev7:
-                    shut_mode = '1'
-                    St = enc
-                    _,raw = meter()
-                    if have_disp:
-                        display.text('OFF', 94, 2, 0)
-                        display.fill_rect(0,12,128,52,0)
-                        if len(str(raw))>7:
-                            raw = str(raw)[0:7]
-                        display.text(str(raw), 64, 23)
-                        display.text(str(St/1000)+'s', 8, 23)
-
                 else:
                     St = plug_encoder()
                     _,raw = meter()
@@ -666,6 +591,9 @@ def Cam_Operation():
                             raw = str(raw)[0:7]
                         display.text(str(raw), 64, 23)
                         display.text(str(ShutterSpeedHuman[St])+'s', 8, 23)
+            """
+            todo : Select shutter speed
+            """
 
             if have_disp: 
                 #display.text(str(ShutterSpeedHuman[St])+'s', 8, 23)
@@ -708,4 +636,5 @@ if __name__ == "__main__":
         #time.sleep_ms(2000)
         #shut(meter())
         break
+
 
