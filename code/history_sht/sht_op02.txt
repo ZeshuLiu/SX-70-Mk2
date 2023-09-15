@@ -1,0 +1,223 @@
+"""
+ev7 = 600	# 1/2
+ev75 = 440	# 1/3
+ev8 = 280	# 1/4
+ev85 =210	# 1/6
+ev9 = 155	# 1/8	OK
+ev95 =120	# 1/10
+ev10 = 97	# 1/15	OK
+ev105 = 70	# 1/20
+ev11 = 48	# 1/30
+ev115 = 40	# 1/45
+ev12 = 33	# 1/60
+ev125 = 29	# 1/90
+ev13 = 25	# 1/125
+ev135 = 23	# 1/180
+ev14 = 21	# 1/250
+ev145 = 20	# 1/360
+ev15 = 19	# 1/500
+ev16 = 18	# 1/1000
+"""
+# 20230914 op02[1:7]
+
+Operation Mode = A
+Raw Lux = 12.16 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 12.61 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 18.67 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 12.49 	Gain = 16.00 
+Mode: 1 Shutter Delay = 18.00
+
+Raw Lux = 0.56 	Gain = 16.00 
+Raw Lux = 0.56 	Gain = 16.00 
+Raw Lux = 0.56 	Gain = 16.00 
+Raw Lux = 0.56 	Gain = 16.00 
+Raw Lux = 0.56 	Gain = 16.00 
+Raw Lux = 0.56 	Gain = 16.00 
+Mode: 0 Shutter Delay = 48.00
+
+Operation Mode = A
+Raw Lux = 0.84 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.15 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.66 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.81 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 0.84 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 0.89 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 0.84 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 0.78 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 0.78 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 0.84 	Gain = 16.00 
+Mode: 1 Shutter Delay = 97.00
+
+Operation Mode = A
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 4.37 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 4.56 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 7.66 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 6.50 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 6.47 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 9.77 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 8.16 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 7.13 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 4.84 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 7.54 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 4.53 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 7.22 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 7.48 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 3.63 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 4.81 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 7.76 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 7.01 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 4.69 	Gain = 16.00 
+Mode: 1 Shutter Delay = 20.00
+
+Operation Mode = A
+Raw Lux = 6.62 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 6.06 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 5.01 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 4.86 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 47.13 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 6.81 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 5.42 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 27.86 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.83 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 2.16 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.87 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.99 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.09 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.51 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 1.54 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 1.59 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 1.66 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 2.24 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 1.66 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 3.85 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.69 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.69 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.66 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 0.69 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 0.69 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 0.69 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 0.69 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 0.69 	Gain = 16.00 
+Mode: 1 Shutter Delay = 155.00
+
+Operation Mode = A
+Raw Lux = 4.82 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 5.08 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 5.28 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 5.17 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 5.14 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 4.68 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 4.61 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 4.55 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 4.90 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 4.93 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 5.29 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 5.17 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 4.44 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 3.96 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 5.21 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 5.14 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 5.19 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 5.16 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 4.72 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 5.05 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 4.98 	Gain = 16.00 
+Mode: 1 Shutter Delay = 21.00
+
+Operation Mode = A
+Raw Lux = 1.09 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.42 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.18 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.27 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.27 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.58 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.36 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.12 	Gain = 16.00 
+Mode: 1 Shutter Delay = 33.00

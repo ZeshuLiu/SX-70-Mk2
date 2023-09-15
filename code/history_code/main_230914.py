@@ -410,8 +410,6 @@ def shut(Shutter_Delay, f="1"):
     if _SAVE_FILE_:
         da_F = open('sht.txt','a')
         da_F.write("Mode: " + f)
-        if Shutter_Delay in ShutterSpeedHuman:
-            da_F.write(" Speed: "+ShutterSpeedHuman[Shutter_Delay])
         da_F.write(" Shutter Delay = {0:.2f}\n\n".format(Shutter_Delay))
         da_F.close()
     
