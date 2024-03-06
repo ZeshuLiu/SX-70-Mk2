@@ -1,9 +1,9 @@
 """
-Ver 1.0.2 20230914
+Ver 1.1.0 2024037
 正常调试版本，适合组装后使用
 直接命名为main.py然后上传进板子的flash里就行
 """
-from machine import Pin,PWM,ADC,I2C
+from machine import Pin,PWM,ADC,I2C, Timer
 import tsl2561,time,ssd1306,pcf8575
 
 # Change Shutter_Delay_Back
@@ -400,8 +400,10 @@ def apture_engage():
     
 def apture_disengage():
     apture.duty_u16(0)
-        
-        
+    
+def close_shutter(timer = None):
+    shutter.duty_u16(65535) # Close Shutter
+
 def shut(Shutter_Delay, f="1"):
     Shutter_Delay = int(Shutter_Delay)
     #f = open('sht_cal.txt','a')
@@ -473,15 +475,18 @@ def shut(Shutter_Delay, f="1"):
             print("Start at", start)
 
         # utime.ticks_diff(old, new)
-        deadline = time.ticks_add(start, Shutter_Delay*1000)
-        while time.ticks_diff(deadline, time.ticks_us()) > 0:
+        # deadline = time.ticks_add(start, Shutter_Delay*1000)
+        # while time.ticks_diff(deadline, time.ticks_us()) > 0:
             #print(time.ticks_diff(time.ticks_us(), start))
-            continue
+        #     continue
         """
         while time.ticks_ms() - start < Shutter_Delay:
             continue
         """
-        # time.sleep_ms(Shutter_Delay)
+        ti = Timer()
+        ti.init(mode = Timer.ONE_SHOT, period = Shutter_Delay, callback = close_shutter)
+
+        time.sleep_ms(Shutter_Delay+200)
         if _CAMERA_DBG_:
             print("End at", time.ticks_us(), "Dura us", time.ticks_us()-start)
     
@@ -516,12 +521,14 @@ def shut(Shutter_Delay, f="1"):
             time.sleep_ms(3)
             if tak == Red_Button_Pressed:
                 break
+
     # End Exposure
-    
     #time.sleep_ms(3000) #Delete
 
     # Close Shutter
-    shutter.duty_u16(65535) # Close Shutter
+    # shutter.duty_u16(65535) # Close Shutter
+    close_shutter()
+
     if _CAMERA_DBG_:
         print("Shutter Closing!")
     time.sleep_ms(30) # wait until shutter fully closed
@@ -534,7 +541,7 @@ def shut(Shutter_Delay, f="1"):
     motor.value(1)
     if _CAMERA_DBG_:
         print("Motor Working!")
-    
+
     #time.sleep_ms(2000) #Delete
 
     # wait until film fully ejact

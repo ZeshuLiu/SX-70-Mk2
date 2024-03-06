@@ -1,0 +1,503 @@
+Operation Mode = M
+Raw Lux = 2.02 	Gain = 16.00 
+Raw Lux = 0.50 	Gain = 16.00 
+Raw Lux = 0.50 	Gain = 16.00 
+Raw Lux = 0.50 	Gain = 16.00 
+Raw Lux = 0.56 	Gain = 16.00 
+Raw Lux = 0.56 	Gain = 16.00 
+Raw Lux = 0.67 	Gain = 16.00 
+Raw Lux = 1.01 	Gain = 16.00 
+Raw Lux = 0.72 	Gain = 16.00 
+Mode: 0 Speed: 1/30 Shutter Delay = 63.00
+
+Raw Lux = 0.67 	Gain = 16.00 
+Mode: 0 Speed: 1/30 Shutter Delay = 63.00
+
+Operation Mode = A
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.66 	Gain = 16.00 
+Mode: 1 Speed: 1/15 Shutter Delay = 97.00
+
+Operation Mode = A
+Raw Lux = 0.66 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.59 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.66 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 2.13 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 2.41 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.16 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.75 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 2.35 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 3.35 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 3.39 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.94 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 4.84 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 3.54 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 4.48 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 5.76 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 5.74 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 4.00 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 1.07 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.81 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.69 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.66 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.59 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.59 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.61 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.59 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.59 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.59 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 0.72 	Gain = 16.00 
+Operation Mode = T
+Operation Mode = T
+Mode: T Speed: 1/30 Shutter Delay = 63.00
+
+Operation Mode = B
+Mode: B Speed: 1/30 Shutter Delay = 63.00
+
+Operation Mode = B
+Operation Mode = B
+Operation Mode = B
+Mode: B Speed: 1/30 Shutter Delay = 63.00
+
+Operation Mode = B
+Operation Mode = B
+Operation Mode = T
+Operation Mode = T
+Operation Mode = A
+Raw Lux = 0.78 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.84 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.84 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.84 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.84 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.84 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 2.01 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.50 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.56 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.56 	Gain = 16.00 
+Mode: 1 Speed: 1/6 Shutter Delay = 210.00
+
+Operation Mode = A
+Raw Lux = 0.50 	Gain = 16.00 
+Mode: 1 Speed: 1/2 Shutter Delay = 600.00
+
+Operation Mode = A
+Raw Lux = 0.56 	Gain = 16.00 
+Mode: 1 Speed: 1/6 Shutter Delay = 210.00
+
+Operation Mode = A
+Raw Lux = 0.50 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.56 	Gain = 16.00 
+Mode: 1 Speed: 1/6 Shutter Delay = 210.00
+
+Operation Mode = A
+Raw Lux = 6.24 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = A
+Raw Lux = 13.04 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = A
+Raw Lux = 10.16 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = A
+Raw Lux = 19.51 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 5.35 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = A
+Raw Lux = 5.92 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = A
+Raw Lux = 6.02 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = A
+Raw Lux = 3.16 	Gain = 16.00 
+Mode: 1 Speed: 1/250 Shutter Delay = 34.00
+
+Operation Mode = A
+Raw Lux = 0.56 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.56 	Gain = 16.00 
+Mode: 1 Speed: 1/6 Shutter Delay = 210.00
+
+Operation Mode = A
+Raw Lux = 0.56 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.56 	Gain = 16.00 
+Operation Mode = A
+Raw Lux = 0.56 	Gain = 16.00 
+Mode: 1 Speed: 1/6 Shutter Delay = 210.00
+
+Operation Mode = A
+Raw Lux = 2.64 	Gain = 16.00 
+Mode: 1 Speed: 1/180 Shutter Delay = 36.00
+
+Operation Mode = T(select time)
+Raw Lux = 1.17 	Gain = 16.00 
+Mode: 1 Shutter Delay = 1100.00
+
+Operation Mode = T(select time)
+Raw Lux = 2.55 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 25.14 	Gain = 16.00 
+Mode: 1 Shutter Delay = 1100.00
+
+Operation Mode = T(select time)
+Raw Lux = 25.08 	Gain = 16.00 
+Mode: 1 Shutter Delay = 1100.00
+
+Operation Mode = T(select time)
+Raw Lux = 31.57 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 22.50 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 29.80 	Gain = 16.00 
+Mode: 1 Shutter Delay = 1100.00
+
+Operation Mode = T(select time)
+Raw Lux = 25.60 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 39.43 	Gain = 16.00 
+Mode: 1 Shutter Delay = 1100.00
+
+Operation Mode = T(select time)
+Raw Lux = 0.56 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 30.63 	Gain = 16.00 
+Mode: 1 Shutter Delay = 1100.00
+
+Operation Mode = T(select time)
+Raw Lux = 30.14 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 30.24 	Gain = 16.00 
+Mode: 1 Shutter Delay = 1100.00
+
+Operation Mode = T(select time)
+Raw Lux = 30.29 	Gain = 16.00 
+Operation Mode = T(select time)
+Raw Lux = 29.96 	Gain = 16.00 
+Mode: 1 Shutter Delay = 1100.00
+
+Operation Mode = T(select time)
+Raw Lux = 30.14 	Gain = 16.00 
+Mode: 1 Shutter Delay = 1100.00
+
+Operation Mode = M
+Raw Lux = 30.55 	Gain = 16.00 
+Mode: 1 Speed: 1/2 Shutter Delay = 600.00
+
+Operation Mode = M
+Raw Lux = 30.43 	Gain = 16.00 
+Mode: 1 Speed: 1/4 Shutter Delay = 311.00
+
+Operation Mode = M
+Raw Lux = 30.38 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 30.26 	Gain = 16.00 
+Mode: 1 Speed: 1/6 Shutter Delay = 210.00
+
+Operation Mode = M
+Raw Lux = 29.94 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 29.88 	Gain = 16.00 
+Mode: 1 Speed: 1/8 Shutter Delay = 175.00
+
+Operation Mode = M
+Raw Lux = 30.38 	Gain = 16.00 
+Mode: 1 Speed: 1/10 Shutter Delay = 130.00
+
+Operation Mode = M
+Raw Lux = 29.57 	Gain = 16.00 
+Mode: 1 Speed: 1/10 Shutter Delay = 130.00
+
+Operation Mode = A
+Raw Lux = 29.69 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = A
+Raw Lux = 29.63 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 29.51 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = B
+Operation Mode = T
+Operation Mode = M
+Raw Lux = 29.33 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 29.17 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 30.10 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 30.10 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 30.22 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 30.16 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 30.00 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 29.70 	Gain = 16.00 
+Mode: 1 Speed: 1/2 Shutter Delay = 600.00
+
+Operation Mode = M
+Raw Lux = 30.12 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 30.06 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.88 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.84 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 29.94 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 30.12 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 30.00 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 30.06 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 29.96 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 30.06 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 30.00 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 30.00 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.96 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.94 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.78 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 29.84 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.84 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.84 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.96 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 29.81 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.92 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 5.69 	Gain = 16.00 
+Mode: 1 Speed: 1/30 Shutter Delay = 63.00
+
+Operation Mode = M
+Raw Lux = 29.75 	Gain = 16.00 
+Mode: 1 Speed: 1/30 Shutter Delay = 63.00
+
+Operation Mode = M
+Raw Lux = 29.69 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 29.98 	Gain = 16.00 
+Mode: 1 Speed: 1/30 Shutter Delay = 63.00
+
+Operation Mode = M
+Raw Lux = 29.96 	Gain = 16.00 
+Mode: 1 Speed: 1/30 Shutter Delay = 63.00
+
+Operation Mode = M
+Raw Lux = 29.71 	Gain = 16.00 
+Mode: 1 Speed: 1/30 Shutter Delay = 63.00
+
+Operation Mode = M
+Raw Lux = 29.96 	Gain = 16.00 
+Mode: 1 Speed: 1/60 Shutter Delay = 46.00
+
+Operation Mode = M
+Raw Lux = 30.08 	Gain = 16.00 
+Mode: 1 Speed: 1/60 Shutter Delay = 46.00
+
+Operation Mode = M
+Raw Lux = 29.87 	Gain = 16.00 
+Mode: 1 Speed: 1/60 Shutter Delay = 46.00
+
+Operation Mode = M
+Raw Lux = 29.92 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 29.81 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 29.87 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 29.92 	Gain = 16.00 
+Mode: 1 Speed: 1/10 Shutter Delay = 130.00
+
+Operation Mode = M
+Raw Lux = 29.75 	Gain = 16.00 
+Operation Mode = M
+Raw Lux = 30.02 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 29.81 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 30.02 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 29.96 	Gain = 16.00 
+Mode: 1 Speed: 1/1000 Shutter Delay = 22.00
+
+Operation Mode = M
+Raw Lux = 29.75 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.69 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 30.02 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 30.20 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.98 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 30.02 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.87 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.63 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
+Operation Mode = M
+Raw Lux = 29.98 	Gain = 16.00 
+Mode: 1 Speed: 1/500 Shutter Delay = 24.00
+
