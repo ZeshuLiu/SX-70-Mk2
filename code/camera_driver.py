@@ -61,6 +61,41 @@ ShutterSpeedHuman = {ev7:'1/2', ev75:'1/3', ev8:'1/4', ev85:'1/6', ev9:'1/8', ev
                         ev125:'1/90', ev13:'1/125', ev135:'1/180', ev14:'1/250', ev145:'1/360',
                         ev15:'1/500', ev16:'1/1000'}
 
+CMD_Dict = {'A':'Auto',
+                ev7:'1/2', ev75:'1/3', ev8:'1/4', ev85:'1/6', ev9:'1/8', ev95:'1/10',
+                ev10:'1/15', ev105:'1/20', ev11:'1/30', ev115:'1/45', ev12:'1/60',
+                ev125:'1/90', ev13:'1/125', ev135:'1/180', ev14:'1/250', ev145:'1/360',
+                ev15:'1/500', ev16:'1/1000'}
+
+CMD_List = [i for i in CMD_Dict]
+
+class Button3D():
+    def  __init__(self) -> None:
+        self.Menu = 0   # 在第几层菜单
+        self.CAM_MODE = CMD_List[0]
+        print(self.CAM_MODE)
+        self.old_button_value = '111'
+        self.thereD_button_debounce_last = time.ticks_ms()
+        self.thereD_button_debounce_time = 100
+
+    def if_can_update(self):
+        # 如果时间不到防抖时间则直接返回
+        if time.ticks_ms() - self.thereD_button_debounce_last < self.thereD_button_debounce_time:
+            return 0
+        return 1
+
+    def update(self, bt):
+        change = 0
+
+        for i in range(3):
+            if self.old_button_value[i] == '1' and self.old_button_value[i] != bt[i]:
+                change = i+1
+        self.old_button_value = bt
+        if (change != 0):
+            print("按下了: %d(1-下 2-上 3-按下)"%change)
+
+        return self.CAM_MODE
+
 class SX70():
     def __init__(self) -> None:
         #~ -------------------------宏定义---------------------------------
@@ -84,11 +119,12 @@ class SX70():
 
 
         #~ ------------------------I2C控制旋钮-----------------------------
-        self.have_enc = False               # I2c旋钮是否存在指示
-        self.enc_pins = [4,5,6,7]           # 主旋扭使用PCF引脚列表 #! 质量不行，未来准备弃用
-        self.sec_enc_pins = [0,1,2,3]       # 副旋钮使用PCF引脚列表 #! 质量不行，未来准备弃用
-        self.pcf = None                     # PCF8575
-
+        self.pcf = None                         # PCF8575
+        self.have_enc = False                   # I2c旋钮是否存在指示
+        self.enc_pins = [4,5,6,7]               # 主旋扭使用PCF引脚列表 #! 质量不行，未来准备弃用
+        self.sec_enc_pins = [0,1,2,3]           # 副旋钮使用PCF引脚列表 #! 质量不行，未来准备弃用
+        self.thereD_button_pins = [12,10,11]    # 三维按键 下，上，按下 顺序
+        self.Button_3D = Button3D()
 
         #~ -------------------------机身设备-------------------------------
         # 机身输出引脚 <具体连接方式与硬件有关，参见： Pins.xls>
@@ -147,7 +183,6 @@ class SX70():
         result = ""
         for i in enc_p:
             result += str(self.pcf.pin(i))
-        #print(result,pcf.pin(1))
         return result
 
     def showFrame(self):
@@ -245,6 +280,17 @@ class SX70():
         elif ec == SEC_EC_NINE:
             self.display.text('T4M', 10, 2, 0)
             return 4*one_min
+
+    def get_cmd_3D_button(self):
+        if not self.Button_3D.if_can_update():
+            return self.Button_3D.CAM_MODE
+
+        cmd = self.Button_3D.update(self.read_enc(self.thereD_button_pins))
+
+        if cmd == 'A':
+            self.display.text('AUTO', 10, 2, 0)
+
+        return cmd
 
     def meter(self):
         # 自动增益
@@ -373,7 +419,7 @@ class SX70():
 
         if plugscan and self.encoder_addr in plug_i2c_add:
             self.pcf = pcf8575.PCF8575(self.plugI2c, self.encoder_addr)
-            self.pcf.port = 0x0ff
+            self.pcf.port = 0xffff
             print("have plug")
             self.have_enc = True
 
@@ -714,13 +760,14 @@ class SX70():
             #~ ------------------判断是否连接了闪光灯------------------
             flash_connected = not self.s2.value()
 
-            #~ -------------------获取红色按钮的信息-------------------
+            #~ ---------------------获取按钮的信息--------------------
             dbpv = self.de_bounce_read_pins([self.s1f,self.s1t])
             foc = dbpv[0]
             tak = dbpv[1]
             if self.have_enc:
                 self.display.fill_rect(0, 0, 50, 11, 1)
-                cmd = self.get_cmd_plug_encoder()
+                # cmd = self.get_cmd_plug_encoder()
+                cmd = self.get_cmd_3D_button()
                 self.display.show()
 
             #~ ---------------如果半按快门，但是还未对焦----------------
@@ -746,5 +793,8 @@ class SX70():
 if __name__ == "__main__":
     a = SX70()
     a.camera_init()
+    while 0:
+        print(a.read_enc(a.thereD_button_pins), a.pcf._port[1])
+        time.sleep(1)
 
     a.Cam_Operation()
