@@ -1,5 +1,5 @@
 """
-Ver 1.0.1 20240307
+Ver 1.1.1 20240308
 by: Liu ZS
 正常调试版本，适合组装后使用
 上传进板子的flash内
@@ -37,6 +37,9 @@ SEC_EC_SEVEN = '0001'
 SEC_EC_EIGHT = '1110'
 SEC_EC_NINE = '0110'
 
+
+ev6 = 1000
+
 ev7 = 600	# 1/2
 ev75 = 455	# 1/3
 ev8 = 311	# 1/4
@@ -56,27 +59,37 @@ ev145 = 29	# 1/360
 ev15 = 24	# 1/500
 ev16 = 22	# 1/1000
 
-ShutterSpeedHuman = {ev7:'1/2', ev75:'1/3', ev8:'1/4', ev85:'1/6', ev9:'1/8', ev95:'1/10',
+ShutterSpeedHuman = {ev6:'1s', ev7:'1/2', ev75:'1/3', ev8:'1/4', ev85:'1/6', ev9:'1/8', ev95:'1/10',
                         ev10:'1/15', ev105:'1/20', ev11:'1/30', ev115:'1/45', ev12:'1/60',
                         ev125:'1/90', ev13:'1/125', ev135:'1/180', ev14:'1/250', ev145:'1/360',
                         ev15:'1/500', ev16:'1/1000'}
 
-CMD_Dict = {'A':'Auto',
-                ev7:'1/2', ev75:'1/3', ev8:'1/4', ev85:'1/6', ev9:'1/8', ev95:'1/10',
+M_CMD_Dict = {ev6:'1s', ev7:'1/2', ev75:'1/3', ev8:'1/4', ev85:'1/6', ev9:'1/8', ev95:'1/10',
                 ev10:'1/15', ev105:'1/20', ev11:'1/30', ev115:'1/45', ev12:'1/60',
                 ev125:'1/90', ev13:'1/125', ev135:'1/180', ev14:'1/250', ev145:'1/360',
                 ev15:'1/500', ev16:'1/1000'}
 
-CMD_List = [i for i in CMD_Dict]
+M_CMD_List = [i for i in M_CMD_Dict]
+M_CMD_List.sort()
 
 class Button3D():
     def  __init__(self) -> None:
-        self.Menu = 0   # 在第几层菜单
-        self.CAM_MODE = CMD_List[0]
-        print(self.CAM_MODE)
+        self.IF_DBG = True
+
+        self.MAX_MENU = 3
+        self.Menu = 0   # 在第几层菜单 0 - AUTO; 1 - T; 2 - B; 3 - M
+        self.CAM_MODE = 'A'
+        self.M_Pos = 0
+
+        if self.IF_DBG:
+            print(self.CAM_MODE)
+            print(M_CMD_List)
+
         self.old_button_value = '111'
         self.thereD_button_debounce_last = time.ticks_ms()
         self.thereD_button_debounce_time = 100
+
+        self.push_down_start_time = time.ticks_ms()
 
     def if_can_update(self):
         # 如果时间不到防抖时间则直接返回
@@ -84,15 +97,88 @@ class Button3D():
             return 0
         return 1
 
+    def down_button_call(self):
+        if self.Menu == 1:
+            if self.IF_DBG:
+                print("在T门按下了下")
+
+        if self.Menu == 3:
+            if self.IF_DBG:
+                print("在M挡按下了下")
+
+            if self.M_Pos == 0:
+                self.M_Pos = len(M_CMD_List) - 1
+            else:
+                self.M_Pos -= 1
+
+    def up_button_call(self):
+        if self.Menu == 1:
+            if self.IF_DBG:
+                print("在T门按下了上")
+
+        if self.Menu == 3:
+            if self.IF_DBG:
+                print("在M挡按下了上")
+            self.M_Pos = (self.M_Pos + 1) % (len(M_CMD_List))
+
+    def push_button_short_call(self):
+        self.Menu = (self.Menu + 1) % (self.MAX_MENU+1)
+
+        if self.Menu == 0:
+            if self.IF_DBG:
+                print("进入A挡")
+            self.CAM_MODE = 'A'
+
+        elif self.Menu == 1:
+            if self.IF_DBG:
+                print("进入B挡")
+            self.CAM_MODE = 'B'
+
+        elif self.Menu == 2:
+            if self.IF_DBG:
+                print("进入T挡")
+            self.CAM_MODE = 'T'
+
+        elif self.Menu == 3:
+            if self.IF_DBG:
+                print("进入M挡")
+            self.CAM_MODE = M_CMD_List[self.M_Pos]
+
+
     def update(self, bt):
         change = 0
 
-        for i in range(3):
-            if self.old_button_value[i] == '1' and self.old_button_value[i] != bt[i]:
-                change = i+1
+        #~ 向下按
+        if self.old_button_value[0] == '1' and self.old_button_value[0] != bt[0]:
+            if self.IF_DBG:
+                print("按下了: 下")
+            self.down_button_call()
+
+        #~ 向上按
+        if self.old_button_value[1] == '1' and self.old_button_value[1] != bt[1]:
+            if self.IF_DBG:
+                print("按下了: 上")
+            self.up_button_call()
+
+        #~ 向下按，在松开时动作（判断长短按）
+        if self.old_button_value[2] == '1' and self.old_button_value[2] != bt[2]:
+            if self.IF_DBG:
+                print("按下了: 按下")
+            self.push_down_start_time = time.ticks_ms()
+
+        if self.old_button_value[2] == '0' and self.old_button_value[2] != bt[2]:
+            if time.ticks_ms() - self.push_down_start_time > 1000:
+                if self.IF_DBG:
+                    print("长按")
+            else:
+                if self.IF_DBG:
+                    print("短按")
+                self.push_button_short_call()
+
         self.old_button_value = bt
-        if (change != 0):
-            print("按下了: %d(1-下 2-上 3-按下)"%change)
+
+        if self.Menu == 3:  # M 挡
+            self.CAM_MODE = M_CMD_List[self.M_Pos]
 
         return self.CAM_MODE
 
@@ -281,16 +367,83 @@ class SX70():
             self.display.text('T4M', 10, 2, 0)
             return 4*one_min
 
+    def mode_disp(self):
+        if self.cmd == 'A':
+            self.display.text('AUTO', 10, 2, 0)
+
+        elif self.cmd == 'B':
+            self.display.text('B', 23, 2, 0)
+
+        elif self.cmd == 'T':
+            self.display.text('T', 23, 2, 0)
+
+        elif self.cmd == ev6:
+            self.display.text('1s', 15, 2, 0)
+
+        elif self.cmd == ev7:
+            self.display.text('1/2', 15, 2, 0)
+
+        elif self.cmd == ev75:
+            self.display.text('1/3', 15, 2, 0)
+
+        elif self.cmd == ev8:
+            self.display.text('1/4', 15, 2, 0)
+
+        elif self.cmd == ev85:
+            self.display.text('1/6', 15, 2, 0)
+
+        elif self.cmd == ev9:
+            self.display.text('1/8', 15, 2, 0)
+
+        elif self.cmd == ev95:
+            self.display.text('1/10', 10, 2, 0)
+
+        elif self.cmd == ev10:
+            self.display.text('1/15', 10, 2, 0)
+
+        elif self.cmd == ev105:
+            self.display.text('1/20', 10, 2, 0)
+
+        elif self.cmd == ev11:
+            self.display.text('1/30', 10, 2, 0)
+
+        elif self.cmd == ev115:
+            self.display.text('1/45', 10, 2, 0)
+
+        elif self.cmd == ev12:
+            self.display.text('1/60', 10, 2, 0)
+
+        elif self.cmd == ev125:
+            self.display.text('1/90', 10, 2, 0)
+
+        elif self.cmd == ev13:
+            self.display.text('1/125', 5, 2, 0)
+
+        elif self.cmd == ev135:
+            self.display.text('1/180', 5, 2, 0)
+
+        elif self.cmd == ev14:
+            self.display.text('1/250', 5, 2, 0)
+
+        elif self.cmd == ev145:
+            self.display.text('1/360', 5, 2, 0)
+
+        elif self.cmd == ev15:
+            self.display.text('1/500', 5, 2, 0)
+
+        elif self.cmd == ev16:
+            self.display.text('1/1000', 1, 2, 0)
+
+
     def get_cmd_3D_button(self):
         if not self.Button_3D.if_can_update():
             return self.Button_3D.CAM_MODE
 
-        cmd = self.Button_3D.update(self.read_enc(self.thereD_button_pins))
+        self.cmd = self.Button_3D.update(self.read_enc(self.thereD_button_pins))
 
-        if cmd == 'A':
-            self.display.text('AUTO', 10, 2, 0)
+        self.mode_disp()
 
-        return cmd
+        return self.cmd
 
     def meter(self):
         # 自动增益
@@ -604,7 +757,8 @@ class SX70():
             self.display.text(str(raw), 64, 23)
             self.display.text(str(ShutterSpeedHuman[St])+'s', 8, 23)
         elif enc != 'B' and enc != 'T':
-            St = self.get_cmd_plug_encoder()
+            # St = self.get_cmd_plug_encoder()
+            St = self.get_cmd_3D_button()
             if St < ev11:
                 St = ev11
             _,raw = self.meter()
@@ -699,7 +853,8 @@ class SX70():
         return shut_mode, St
 
     def Focus_M_work(self):
-        St = self.get_cmd_plug_encoder()
+        # St = self.get_cmd_plug_encoder()
+        St = self.get_cmd_3D_button()
         if self._SAVE_FILE_:
             da_F = open('sht.txt','a')
             da_F.write("Operation Mode = M\n")
@@ -767,13 +922,13 @@ class SX70():
             if self.have_enc:
                 self.display.fill_rect(0, 0, 50, 11, 1)
                 # cmd = self.get_cmd_plug_encoder()
-                cmd = self.get_cmd_3D_button()
+                self.cmd = self.get_cmd_3D_button()
                 self.display.show()
 
             #~ ---------------如果半按快门，但是还未对焦----------------
             # 负责对焦+测光
             if foc == self.Red_Button_Pressed and self.if_focused == False:
-                shut_mode, St = self.Focus(cmd)
+                shut_mode, St = self.Focus(self.cmd)
 
             #~ ---------------松开半按快门，但是已经对焦----------------
             if foc != self.Red_Button_Pressed and self.if_focused == True:
