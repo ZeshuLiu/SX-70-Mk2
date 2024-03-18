@@ -1,5 +1,5 @@
 """
-Ver 1.1.2 20240314
+Ver 1.2.2 20240314
 by: Liu ZS
 正常调试版本，适合组装后使用
 上传进板子的flash内
@@ -232,6 +232,7 @@ class SX70():
         self._CAMERA_DBG_ = True
         self._SAVE_FILE_ = False
 
+        self._BODY_CONTROLLER_V2_ = True
 
         #~ ------------------------I2C总线设备-----------------------------
         self.lm_i2c = I2C(0,scl=Pin(21), sda=Pin(20), freq=400000)  # 测光表的I2C
@@ -478,7 +479,6 @@ class SX70():
         elif self.cmd == ev16:
             self.display.text('1/1000', 1, 2, 0)
 
-
     def get_cmd_3D_button(self):
         if not self.Button_3D.if_can_update():
             return self.Button_3D.CAM_MODE
@@ -578,10 +578,12 @@ class SX70():
         self.shutter.duty_u16(65535) # Close Shutter
 
     def camera_init(self):
+        #~ 扫描I2c设备
         plug_i2c_add = self.plugI2c.scan()
         plugscan = bool(plug_i2c_add) and len(plug_i2c_add)<=5
         print(self.plugI2c.scan())
 
+        #~ 声明输入输出引脚
         self.shutter = PWM(Pin(self.shutter_pin))
         self.shutter.freq(20000)
         self.shutter.duty_u16(0)
@@ -601,6 +603,7 @@ class SX70():
         self.s1f = Pin(self.S1F_PIN,Pin.IN)
         self.s1t = Pin(self.S1T_PIN,Pin.IN)
 
+        #~ 设置ISO
         f = open('./dat/iso.txt')
         self.iso = f.readline()
         self.iso.replace(" ","")
@@ -614,17 +617,23 @@ class SX70():
             self.LED_B.value(0)
             #display.text('70', 60, 2, 0)
 
+        #~ 初始化外接控制器
         if plugscan and self.encoder_addr in plug_i2c_add:
             self.pcf = pcf8575.PCF8575(self.plugI2c, self.encoder_addr)
             self.pcf.port = 0xffff
             print("have plug")
             self.have_enc = True
 
+        #~ 初始化外部显示
         if plugscan and self.display_addr in plug_i2c_add:
 
             self.display = ssd1306.SSD1306_I2C(128, 32, self.plugI2c,addr=self.display_addr) # 设置宽度，高度和I2C通信
             self.have_disp = True
             self.display.contrast(1)
+
+            if self._BODY_CONTROLLER_V2_:
+                self.display.rotate(1)
+
             if self._CAMERA_DBG_:
                 print("have disp")
             self.showFrame()
@@ -708,6 +717,7 @@ class SX70():
             self.shutter.duty_u16(0)    #& 开启快门
             time.sleep_ms(47)
             self.FF.value(1)
+            time.sleep_ms(1)
             self.FF.value(0)
             time.sleep_ms(gap)
 
@@ -957,7 +967,7 @@ class SX70():
     def Cam_Operation(self):
         while True:
             #~ ------------------判断是否连接了闪光灯------------------
-            flash_connected = not self.s2.value()
+            self.flash_connected = not self.s2.value()
 
             #~ ---------------------获取按钮的信息--------------------
             dbpv = self.de_bounce_read_pins([self.s1f,self.s1t])
