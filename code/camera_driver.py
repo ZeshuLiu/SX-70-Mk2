@@ -1,5 +1,5 @@
 """
-Ver 1.2.2 20240314
+Ver 1.2.3 20240318
 by: Liu ZS
 正常调试版本，适合组装后使用
 上传进板子的flash内
@@ -52,11 +52,12 @@ ev115 = 52	# 1/45
 ev12 = 45	# 1/60
 ev125 = 41	# 1/90
 ev13 = 38	# 1/125
-ev135 = 36	# 1/180
+ev135 = 35	# 1/180
 ev14 = 32	#& 1/250    10  45
 ev145 = 29	#& 1/360    9   34
 ev15 = 26	#& 1/500    4   15
 ev16 = 24	#& 1/1000
+ev17 = 23	#& 1/2000
 
 """
 #! 1/1000s 快门慢了一档(照片太亮); 1/250 快门慢1/3以内
@@ -100,18 +101,18 @@ ev135 = 36	# 1/180
 ev14 = 34	# 1/250
 ev145 = 29	# 1/360
 ev15 = 24	# 1/500
-ev16 = 22	# 1/1000
+ev16 = 22	# 1/1000    非常黑
 """
 
 ShutterSpeedHuman = {ev6:'1s', ev7:'1/2', ev75:'1/3', ev8:'1/4', ev85:'1/6', ev9:'1/8', ev95:'1/10',
                         ev10:'1/15', ev105:'1/20', ev11:'1/30', ev115:'1/45', ev12:'1/60',
                         ev125:'1/90', ev13:'1/125', ev135:'1/180', ev14:'1/250', ev145:'1/360',
-                        ev15:'1/500', ev16:'1/1000'}
+                        ev15:'1/500', ev16:'1/1000', ev17:'1/2000'}
 
 M_CMD_Dict = {ev6:'1s', ev7:'1/2', ev75:'1/3', ev8:'1/4', ev85:'1/6', ev9:'1/8', ev95:'1/10',
                 ev10:'1/15', ev105:'1/20', ev11:'1/30', ev115:'1/45', ev12:'1/60',
                 ev125:'1/90', ev13:'1/125', ev135:'1/180', ev14:'1/250', ev145:'1/360',
-                ev15:'1/500', ev16:'1/1000'}
+                ev15:'1/500', ev16:'1/1000', ev17:'1/2000'}
 
 M_CMD_List = [i for i in M_CMD_Dict]
 M_CMD_List.sort()
@@ -929,6 +930,7 @@ class SX70():
         mode = None
         st = None
         self.S1F_FBW.value(1)
+        self.if_focused = True
         if self.have_disp:
             self.showFrame()
             if self.iso == '600':
@@ -937,6 +939,7 @@ class SX70():
                 self.display.text('70', 60, 2, 0)
 
         if self.flash_connected:    # 有闪光灯
+            self.if_focused = True
             return self.Focus_Flash_work(cmd)
 
         else:                       # 无闪光灯
@@ -957,12 +960,13 @@ class SX70():
 
             if self.have_disp:
                 self.display.show()
-            self.if_focused = True
 
-            if self._CAMERA_DBG_:
-                print("Focusing!")
+        self.if_focused = True
 
-            return mode, st
+        if self._CAMERA_DBG_:
+            print("Focusing!")
+
+        return mode, st
 
     def Cam_Operation(self):
         while True:
