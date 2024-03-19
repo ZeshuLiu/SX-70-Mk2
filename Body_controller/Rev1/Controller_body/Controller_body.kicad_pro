@@ -564,7 +564,7 @@
       "plot": "",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "3D/Controller_body.step",
+      "step": "../3D_v2/Controller_body.step",
       "svg": "",
       "vrml": ""
     },
