@@ -1,5 +1,5 @@
 """
-Ver 1.2.4 20240319 
+Ver 1.2.5 20240331 
 by: Liu ZS
 正常调试版本，适合组装后使用
 上传进板子的flash内
@@ -127,10 +127,14 @@ class Button3D():
     def  __init__(self) -> None:
         self.IF_DBG = True
 
-        self.MAX_MENU = 3
-        self.Menu = 0   # 在第几层菜单 0 - AUTO; 1 - T; 2 - B; 3 - M
-        self.CAM_MODE = 'A'
-        self.M_Pos = 0
+        self.MAX_MENU = 3       # 初级菜单最大长度
+        self.Menu = 0           # 在第几层菜单 0 - AUTO; 1 - T; 2 - B; 3 - M; 10 - 自拍计时
+        self.Menu_0_9_mem = 0   # 存放从0-9离开时的菜单
+        self.CAM_MODE = 'A'     # 相机工作模式
+        self.M_Pos = 0          # 快门速度在列表中的索引值
+
+        self.TimerSecList = [0, 3, 5, 10]      # 备选自拍定时器时间
+        self.SelfTimerSecInd = 0
 
         if self.IF_DBG:
             print(self.CAM_MODE)
@@ -147,6 +151,27 @@ class Button3D():
         if time.ticks_ms() - self.thereD_button_debounce_last < self.thereD_button_debounce_time:
             return 0
         return 1
+
+    def update_Menu(self):
+        if self.Menu == 0:
+            if self.IF_DBG:
+                print("进入A挡")
+            self.CAM_MODE = 'A'
+
+        elif self.Menu == 1:
+            if self.IF_DBG:
+                print("进入B挡")
+            self.CAM_MODE = 'B'
+
+        elif self.Menu == 2:
+            if self.IF_DBG:
+                print("进入T挡")
+            self.CAM_MODE = 'T'
+
+        elif self.Menu == 3:
+            if self.IF_DBG:
+                print("进入M挡")
+            self.CAM_MODE = M_CMD_List[self.M_Pos]
 
     def down_button_call(self):
         if self.Menu == 1:
@@ -172,29 +197,30 @@ class Button3D():
                 print("在M挡按下了上")
             self.M_Pos = (self.M_Pos + 1) % (len(M_CMD_List))
 
+        if self.Menu == 10:
+            if self.IF_DBG:
+                print("自拍定时时间增加")
+            self.SelfTimerSecInd = (self.SelfTimerSecInd + 1) %(len(self.TimerSecList))
+
+
     def push_button_short_call(self):
-        self.Menu = (self.Menu + 1) % (self.MAX_MENU+1)
+        # 更高阶菜单时不响应
+        if self.Menu > self.MAX_MENU:
+            return
 
-        if self.Menu == 0:
-            if self.IF_DBG:
-                print("进入A挡")
-            self.CAM_MODE = 'A'
+        if self.Menu <= self.MAX_MENU:
+            self.Menu = (self.Menu + 1) % (self.MAX_MENU+1)
 
-        elif self.Menu == 1:
-            if self.IF_DBG:
-                print("进入B挡")
-            self.CAM_MODE = 'B'
+        self.update_Menu()
 
-        elif self.Menu == 2:
-            if self.IF_DBG:
-                print("进入T挡")
-            self.CAM_MODE = 'T'
-
-        elif self.Menu == 3:
-            if self.IF_DBG:
-                print("进入M挡")
-            self.CAM_MODE = M_CMD_List[self.M_Pos]
-
+    def push_button_long_call(self):
+        if self.Menu < 10:
+            self.Menu_0_9_mem = self.Menu
+            self.Menu = 10
+        elif self.Menu == 10:
+            self.Menu = self.Menu_0_9_mem
+            self.update_Menu()
+            print(self.Menu, "返回原本")
 
     def update(self, bt):
         change = 0
@@ -221,6 +247,7 @@ class Button3D():
             if time.ticks_ms() - self.push_down_start_time > 1000:
                 if self.IF_DBG:
                     print("长按")
+                self.push_button_long_call()
             else:
                 if self.IF_DBG:
                     print("短按")
@@ -231,7 +258,10 @@ class Button3D():
         if self.Menu == 3:  # M 挡
             self.CAM_MODE = M_CMD_List[self.M_Pos]
 
-        return self.CAM_MODE
+        if self.Menu == 10:
+            self.CAM_MODE = '---'
+
+        return self.CAM_MODE, self.TimerSecList[self.SelfTimerSecInd]
 
 class SX70():
     def __init__(self) -> None:
@@ -249,7 +279,6 @@ class SX70():
         self.display_addr = 60
         self.encoder_addr = 32
         self.LM_ADDR = 41
-
 
         #~ ------------------------I2C显示设备-----------------------------
         self.have_disp = False              # I2c显示设备是否存在指示
@@ -294,7 +323,7 @@ class SX70():
         self.Red_Button_Pressed = 1
         self.if_focused = False
         self.flash_connected = False
-
+        self.SelfTimerSec = 0   # 自拍定时器倒计时
 
         #~ -------------------------工作参数定义------------------------------
         self.de_bounce_time = 1
@@ -420,6 +449,8 @@ class SX70():
             return 4*one_min
 
     def mode_disp(self):
+        if self.cmd == '---':
+            self.display.text('---', 11, 2, 0)
         if self.cmd == 'A':
             self.display.text('AUTO', 10, 2, 0)
 
@@ -489,13 +520,29 @@ class SX70():
         elif self.cmd == ev17:
             self.display.text('1/2000', 1, 2, 0)    # 1.2.4 版本加入
 
+    def TakeDisp(self, St, word):
+        if self.SelfTimerSec:
+            word = 'T+' + str(self.SelfTimerSec)
+        if len(str(word))>7:
+            word = str(word)[0:7]
+        self.display.text(str(word), 64, 23)
+        if St in ShutterSpeedHuman:
+            self.display.text(str(ShutterSpeedHuman[St])+'s', 8, 23)
+
+        self.display.show()
+
     def get_cmd_3D_button(self):
         if not self.Button_3D.if_can_update():
             return self.Button_3D.CAM_MODE
 
-        self.cmd = self.Button_3D.update(self.read_enc(self.thereD_button_pins))
+        self.cmd, self.SelfTimerSec = self.Button_3D.update(self.read_enc(self.thereD_button_pins))
 
         self.mode_disp()
+
+        if self.cmd == '---' and self.have_disp:
+            # self.display.text('---', 94, 2, 0)
+            self.display.fill_rect(0,12,128,52,0)
+            self.display.text('T+' + str(self.SelfTimerSec), 8, 23)
 
         return self.cmd
 
@@ -622,10 +669,8 @@ class SX70():
             print("ISO at %s!"%self.iso)
         if self.iso == '600':
             self.LED_Y.value(0)
-            #display.text('600', 55, 2, 0)
         else:
             self.LED_B.value(0)
-            #display.text('70', 60, 2, 0)
 
         #~ 初始化外接控制器
         if plugscan and self.encoder_addr in plug_i2c_add:
@@ -657,12 +702,11 @@ class SX70():
                 pass
             else:
                 if not self.have_enc:
-                    self.display.text('Auto', 10, 2, 0)
+                    self.cmd = 'A'
+                    # self.display.text('Auto', 10, 2, 0)
+                    self.mode_disp()
                 shut_speed,raw = self.meter()
-                self.display.text(str(ShutterSpeedHuman[shut_speed])+'s', 8, 23)
-                if len(str(raw))>7:
-                    raw = str(raw)[0:7]
-                self.display.text(str(raw), 64, 23)
+                self.TakeDisp(shut_speed, raw)
             self.display.show()
 
     def shut(self, Shutter_Delay, f="1"):
@@ -704,13 +748,13 @@ class SX70():
                     print("Motor Stoped!")
                 break
 
-        #~ ----------------Y Delay 此时如果使用闪光灯则光圈就位------------------
+        #~ ----------------Y Delay 此时如果使用闪光灯则光圈就位 如果有自拍定时则延时------------------
         if f=='0': #光圈就位
             self.apture_engage()
             if self._CAMERA_DBG_:
                 print("apture_engage")
 
-        time.sleep_ms(18) # Y delay
+        time.sleep_ms(18 + 1000*self.SelfTimerSec) # Y delay
 
         #~ ---------------------开启快门 曝光开始-------------------------------
         if self._CAMERA_DBG_:
@@ -814,12 +858,8 @@ class SX70():
         shut_mode = '0'
         if (not self.have_enc) or enc =='A':
             St = ev11
-            self.display.text(str(ShutterSpeedHuman[St])+'s', 8, 23)
             _,raw = self.meter()
-            if len(str(raw))>7:
-                raw = str(raw)[0:7]
-            self.display.text(str(raw), 64, 23)
-            self.display.text(str(ShutterSpeedHuman[St])+'s', 8, 23)
+            self.TakeDisp(St, raw)
         elif enc != 'B' and enc != 'T':
             # St = self.get_cmd_plug_encoder()
             St = self.get_cmd_3D_button()
@@ -828,14 +868,12 @@ class SX70():
             _,raw = self.meter()
             if len(str(raw))>7:
                 raw = str(raw)[0:7]
-            self.display.text(str(raw), 64, 23)
-            self.display.text(str(ShutterSpeedHuman[St])+'s', 8, 23)
+            self.TakeDisp(St, raw)
         else:
             if self.have_disp:
                 self.display.text('---', 94, 2, 0)
-                self.display.fill_rect(0,12,128,52,0)
-                self.display.text('Not Support', 8, 23)
-            return shut_mode, St
+                self.TakeDisp('---', 'Not Support')
+            return shut_mode, '---'
 
         if self.have_disp:
             self.display.text('FLASH', 86, 2, 0)
@@ -859,10 +897,7 @@ class SX70():
 
         shut_mode = '1' # '0'-flash; '1'-normal; 'B'- B; 'T' - T
         if self.have_disp:
-            if len(str(raw))>7:
-                raw = str(raw)[0:7]
-            self.display.text(str(raw), 64, 23)
-            self.display.text(str(ShutterSpeedHuman[St])+'s', 8, 23)
+            self.TakeDisp(St, raw)
 
         return shut_mode, St
 
@@ -873,13 +908,11 @@ class SX70():
             da_F.write("Operation Mode = B\n")
             da_F.close()
         if not self.have_enc and self.have_disp:
-                #display.text('B', 10, 2, 0)
                 pass
         if self.have_disp:
             self.display.text('OFF', 94, 2, 0)
-            self.display.fill_rect(0,12,128,52,0)
-            #display.text('Shutter open until button release', 8, 23)
-            self.display.text('Open When Press', 8, 23)
+            self.TakeDisp('', 'B Mode')
+
         return shut_mode, ev11
 
     def Focus_T_work(self):
@@ -889,13 +922,10 @@ class SX70():
             da_F.close()
         shut_mode = 'T'
         if not self.have_enc and self.have_disp:
-                #display.text('B', 10, 2, 0)
                 pass
         if self.have_disp:
             self.display.text('OFF', 94, 2, 0)
-            self.display.fill_rect(0,12,128,52,0)
-            #display.text('Shutter open until button release', 8, 23)
-            self.display.text('Press to Stop', 8, 23)
+            self.TakeDisp('', 'T Mode')
         return shut_mode, ev11
 
     def Focus_TP_work(self, enc):
@@ -908,11 +938,7 @@ class SX70():
         _,raw = self.meter()
         if self.have_disp:
             self.display.text('OFF', 94, 2, 0)
-            self.display.fill_rect(0,12,128,52,0)
-            if len(str(raw))>7:
-                raw = str(raw)[0:7]
-            self.display.text(str(raw), 64, 23)
-            self.display.text(str(St/1000)+'s', 8, 23)
+            self.TakeDisp('', 'TP Mode')
 
         return shut_mode, St
 
@@ -926,12 +952,7 @@ class SX70():
         _,raw = self.meter()
         shut_mode = '1' # '0'-flash; '1'-normal; 'B'; 'T'
         if self.have_disp:
-            self.display.text('OFF', 94, 2, 0)
-            self.display.fill_rect(0,12,128,52,0)
-            if len(str(raw))>7:
-                raw = str(raw)[0:7]
-            self.display.text(str(raw), 64, 23)
-            self.display.text(str(ShutterSpeedHuman[St])+'s', 8, 23)
+            self.TakeDisp(St, raw)
 
         return shut_mode, St
 
@@ -995,10 +1016,18 @@ class SX70():
             #~ ---------------如果半按快门，但是还未对焦----------------
             # 负责对焦+测光
             if foc == self.Red_Button_Pressed and self.if_focused == False:
+                if self.cmd == '---':
+                    if self._CAMERA_DBG_:
+                        print("不在拍摄模式")
+                    continue
                 shut_mode, St = self.Focus(self.cmd)
 
             #~ ---------------松开半按快门，但是已经对焦----------------
             if foc != self.Red_Button_Pressed and self.if_focused == True:
+                if self.cmd == '---':
+                    if self._CAMERA_DBG_:
+                        print("不在拍摄模式")
+                    continue
                 self.S1F_FBW.value(0)
                 self.if_focused = False
                 if self._CAMERA_DBG_:
@@ -1008,6 +1037,10 @@ class SX70():
 
             #~ ---------------全按快门，拍摄照片----------------
             if tak == self.Red_Button_Pressed:
+                if self.cmd == '---':
+                    if self._CAMERA_DBG_:
+                        print("不在拍摄模式")
+                    continue
                 self.Take_Photo(St, shut_mode)
                 if self._CAMERA_DBG_:
                     print(dbpv)
