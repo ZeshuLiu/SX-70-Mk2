@@ -44,7 +44,7 @@ PCB制造时选择0.8mm以下厚度，光绘（Gerber）文件可以在[Fabricat
 把板子上的U+ U- GND VCC焊到usb线上，连接电脑后可以当作树莓派Pico开发板进行操作，具体上传的方法在[这里（树莓派官网）](https://www.raspberrypi.com/documentation/microcontrollers/rp2040.html#raspberry-pi-pico)，或者自行搜索。\
 建议在组装之前将micropython固件及代码烧录至控制器中。后续可以通过机身控制器上的USB接口连接至开发板并更新python代码。
 将[code](https://github.com/ZeshuLiu/OPSX-Sonnar/tree/main/code)根目录中的所有py文件上传至控制器，**并且将g_main.py命名为 main.py(非常重要，只有这样才能够上电运行)**\
-建议针对自己的快门适当调整代码中快门速度的值，可以使用这个[快门速度测试器](https://github.com/ZeshuLiu/OPSX-Sonnar/tree/main/code)来便于测试自己快门的打开时间。
+建议针对自己的快门适当调整代码中快门速度的值，可以使用这个[快门速度测试器](https://github.com/ZeshuLiu/ShutterSpeedCalibrator)来测试快门的打开时间。
 
 ## 组装
 > 提示：首先你需要一些基本的工具：电烙铁、撬棒和镊子。\
