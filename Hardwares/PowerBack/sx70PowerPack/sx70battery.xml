@@ -1,0 +1,766 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<export version="E">
+  <design>
+    <source>F:\Data\开发\sx70BatteryPack\PCB\sx70battery\sx70battery.kicad_sch</source>
+    <date>2023/4/1 17:05:25</date>
+    <tool>Eeschema (6.0.7)</tool>
+    <sheet number="1" name="/" tstamps="/">
+      <title_block>
+        <title>iBattery For SX70 </title>
+        <company>ZS Liu</company>
+        <rev>1.0</rev>
+        <date>2023-03-26</date>
+        <source>sx70battery.kicad_sch</source>
+        <comment number="1" value=""/>
+        <comment number="2" value=""/>
+        <comment number="3" value=""/>
+        <comment number="4" value=""/>
+        <comment number="5" value=""/>
+        <comment number="6" value=""/>
+        <comment number="7" value=""/>
+        <comment number="8" value=""/>
+        <comment number="9" value=""/>
+      </title_block>
+    </sheet>
+  </design>
+  <components>
+    <comp ref="5V+1">
+      <value>5V+</value>
+      <footprint>Connector_Wire:SolderWirePad_1x01_SMD_1x2mm</footprint>
+      <libsource lib="Connector" part="Conn_01x01_Female" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>105b7750-89d6-4561-80c7-87b8f40400c3</tstamps>
+    </comp>
+    <comp ref="6V+1">
+      <value>6V+</value>
+      <footprint>Connector_Wire:SolderWirePad_1x01_SMD_1x2mm</footprint>
+      <libsource lib="Connector" part="Conn_01x01_Female" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>3d8c1863-0542-4d4c-90cf-fc4bb8af8621</tstamps>
+    </comp>
+    <comp ref="BAT+1">
+      <value>BAT+</value>
+      <footprint>Connector_Wire:SolderWirePad_1x01_SMD_1x2mm</footprint>
+      <libsource lib="Connector" part="Conn_01x01_Female" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>58c8130e-7f3e-4e1d-97a1-47f293e09524</tstamps>
+    </comp>
+    <comp ref="BAT-1">
+      <value>BAT-</value>
+      <footprint>Connector_Wire:SolderWirePad_1x01_SMD_1x2mm</footprint>
+      <libsource lib="Connector" part="Conn_01x01_Female" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>978636f2-148f-405c-af39-3b9224798cf3</tstamps>
+    </comp>
+    <comp ref="Bolt1">
+      <value>M3_BOLT</value>
+      <footprint>Jimmy_Library:M3 BOLT</footprint>
+      <libsource lib="Jimmy_Library" part="M3_BOLT" description=""/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>5741bdde-eded-4b16-8168-80f7760567e2</tstamps>
+    </comp>
+    <comp ref="Bolt2">
+      <value>M3_BOLT</value>
+      <footprint>Jimmy_Library:M3 BOLT</footprint>
+      <libsource lib="Jimmy_Library" part="M3_BOLT" description=""/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c4bd314d-e14b-4ab4-9832-70cc6279306a</tstamps>
+    </comp>
+    <comp ref="C1">
+      <value>1u</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d570b21d-a5d0-4984-ba6d-95a2771814a8</tstamps>
+    </comp>
+    <comp ref="C2">
+      <value>10u</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>0ae4b2a2-d71a-406c-84b6-c2c3a4b67065</tstamps>
+    </comp>
+    <comp ref="C3">
+      <value>22u</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>995897cd-9c93-47af-ad62-5cc0fd3cf37e</tstamps>
+    </comp>
+    <comp ref="C4">
+      <value>22u</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>c4fe63c0-0817-44a3-a870-82827ebc3d13</tstamps>
+    </comp>
+    <comp ref="C5">
+      <value>22u</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>dbe44856-95a4-42a9-b269-036be44177cb</tstamps>
+    </comp>
+    <comp ref="C6">
+      <value>22u</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>494ba376-5189-4f5c-b011-a53d40b90918</tstamps>
+    </comp>
+    <comp ref="C7">
+      <value>1u</value>
+      <footprint>Capacitor_SMD:C_0805_2012Metric_Pad1.18x1.45mm_HandSolder</footprint>
+      <libsource lib="Device" part="C" description="Unpolarized capacitor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>9544d528-a6b2-4d56-bbec-a684401dcabc</tstamps>
+    </comp>
+    <comp ref="CHARG1">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>1dd5ec75-4fe4-45ea-bdad-8fc99e40d0ac</tstamps>
+    </comp>
+    <comp ref="D1">
+      <value>MBRA340</value>
+      <footprint>Diode_SMD:D_SMA</footprint>
+      <datasheet>https://www.onsemi.com/pub/Collateral/MBRA340T3-D.PDF</datasheet>
+      <libsource lib="Diode" part="MBRA340" description="40V 3A Schottky Barrier Rectifier Diode, SMA(DO-214AC)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>8fea9b57-ed04-4cf5-b644-00e2f400e8f8</tstamps>
+    </comp>
+    <comp ref="D2">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>fcdf78af-2752-4311-9869-e768e7f98413</tstamps>
+    </comp>
+    <comp ref="D3">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>fa4d85a9-3bd2-4407-8bd6-d65bc6931345</tstamps>
+    </comp>
+    <comp ref="D4">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>42e2d578-3448-47ea-b31a-098e3dd84870</tstamps>
+    </comp>
+    <comp ref="D5">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>3846a378-10d6-4c30-97bc-39820da2d02e</tstamps>
+    </comp>
+    <comp ref="GND1">
+      <value>GND</value>
+      <footprint>Connector_Wire:SolderWirePad_1x01_SMD_1x2mm</footprint>
+      <libsource lib="Connector" part="Conn_01x01_Female" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>2569b64f-ccc9-40a4-ac37-0ef7b2c23a7e</tstamps>
+    </comp>
+    <comp ref="GND2">
+      <value>GND</value>
+      <footprint>Connector_Wire:SolderWirePad_1x01_SMD_1x2mm</footprint>
+      <libsource lib="Connector" part="Conn_01x01_Female" description="Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>14312b9e-ef09-449e-a378-87b39efd2592</tstamps>
+    </comp>
+    <comp ref="Hole1">
+      <value>Tripod_hole</value>
+      <footprint>Jimmy_Library:Tripod_hole</footprint>
+      <libsource lib="Jimmy_Library" part="Tripod_hole" description=""/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b46ba151-3902-4e9d-96c7-38541131d153</tstamps>
+    </comp>
+    <comp ref="L1">
+      <value>10u</value>
+      <footprint>Inductor_SMD:L_Taiyo-Yuden_NR-40xx_HandSoldering</footprint>
+      <libsource lib="Device" part="L" description="Inductor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>5dc9457a-6719-498b-887c-d0a4ae1cd742</tstamps>
+    </comp>
+    <comp ref="R1">
+      <value>1k</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder</footprint>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>fcea9aee-abf0-427c-a37d-2e17be54d25b</tstamps>
+    </comp>
+    <comp ref="R2">
+      <value>75k</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder</footprint>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>e48a5d9c-7855-4fb3-a577-4fe98dbdf6fb</tstamps>
+    </comp>
+    <comp ref="R3">
+      <value>15k</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder</footprint>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>b69b8e96-ff7d-4291-a19e-7672a023b2d3</tstamps>
+    </comp>
+    <comp ref="R4">
+      <value>10k</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder</footprint>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>70cefe3b-3f22-4332-9c44-d0e0ace108ef</tstamps>
+    </comp>
+    <comp ref="R5">
+      <value>330</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder</footprint>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>9d02706f-eddd-45a2-ae64-2dce48f1f494</tstamps>
+    </comp>
+    <comp ref="R_OC1">
+      <value>75k</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder</footprint>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>54aa4c6c-2b56-4d90-94d7-7b58a5c4370f</tstamps>
+    </comp>
+    <comp ref="R_PROG1">
+      <value>10k</value>
+      <footprint>Resistor_SMD:R_0805_2012Metric_Pad1.20x1.40mm_HandSolder</footprint>
+      <libsource lib="Device" part="R" description="Resistor"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>22457289-e0b1-442a-b9ae-82868efc7b5e</tstamps>
+    </comp>
+    <comp ref="S1">
+      <value>SS12D07VG4</value>
+      <footprint>Jimmy_Library:SW_SS12D07VG4</footprint>
+      <fields>
+        <field name="MANUFACTURER">Shouhan</field>
+        <field name="MAXIMUM_PACKAGE_HEIGHT">8.7mm</field>
+        <field name="PARTREV">1</field>
+        <field name="STANDARD">Manufacturer Recommendations</field>
+      </fields>
+      <libsource lib="SS12D07VG4" part="SS12D07VG4" description=""/>
+      <property name="MANUFACTURER" value="Shouhan"/>
+      <property name="MAXIMUM_PACKAGE_HEIGHT" value="8.7mm"/>
+      <property name="PARTREV" value="1"/>
+      <property name="STANDARD" value="Manufacturer Recommendations"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>962b23e4-cad1-4f9c-8fe1-c4a5495e0789</tstamps>
+    </comp>
+    <comp ref="STDBY1">
+      <value>LED</value>
+      <footprint>LED_SMD:LED_0805_2012Metric_Pad1.15x1.40mm_HandSolder</footprint>
+      <libsource lib="Device" part="LED" description="Light emitting diode"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>4d60c52b-1675-4c42-a6c1-86006df8a7dc</tstamps>
+    </comp>
+    <comp ref="SW1">
+      <value>SW_Push</value>
+      <footprint>Button_Switch_THT:SW_PUSH_6mm_H7.3mm</footprint>
+      <libsource lib="Switch" part="SW_Push" description="Push button switch, generic, two pins"/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>3fd2bc6e-157f-4c8c-bad7-49c640658d70</tstamps>
+    </comp>
+    <comp ref="Sx70_Pogopin1">
+      <value>Sx70_Pogopin</value>
+      <footprint>Jimmy_Library:sx_70_pogopin</footprint>
+      <libsource lib="Jimmy_Library" part="Sx70_Pogopin" description=""/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>eaf9d194-9b46-469d-b389-954340ca6cbe</tstamps>
+    </comp>
+    <comp ref="U1">
+      <value>TP4057</value>
+      <footprint>SOT23-6:SOT23-6</footprint>
+      <libsource lib="TP4057" part="TP4057" description=""/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>f6076767-47c3-4f7b-94e2-f06b16594748</tstamps>
+    </comp>
+    <comp ref="U2">
+      <value>PW5300A</value>
+      <footprint>Package_TO_SOT_SMD:TSOT-23-6_HandSoldering</footprint>
+      <libsource lib="Jimmy_Library" part="PW5300A" description=""/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>32e72fae-1416-429e-9f72-8a26786826f9</tstamps>
+    </comp>
+    <comp ref="U3">
+      <value>LN60A</value>
+      <footprint>Package_TO_SOT_SMD:SOT-23-6_Handsoldering</footprint>
+      <libsource lib="Jimmy_Library" part="LN60A" description=""/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>5108a0cc-01a9-4ed5-8772-b5b85b9b731e</tstamps>
+    </comp>
+    <comp ref="USB1">
+      <value>USB-C-6P</value>
+      <footprint>Jimmy_Library:USB-C-6</footprint>
+      <libsource lib="Jimmy_Library" part="USB-C-6P" description=""/>
+      <property name="Sheetname" value=""/>
+      <property name="Sheetfile" value="sx70battery.kicad_sch"/>
+      <sheetpath names="/" tstamps="/"/>
+      <tstamps>d0400b75-2acd-40fc-8f63-ec1749a4e141</tstamps>
+    </comp>
+  </components>
+  <libparts>
+    <libpart lib="Connector" part="Conn_01x01_Female">
+      <description>Generic connector, single row, 01x01, script generated (kicad-library-utils/schlib/autogen/connector/)</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Connector*:*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">J</field>
+        <field name="Value">Conn_01x01_Female</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Pin_1" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="C">
+      <description>Unpolarized capacitor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>C_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">C</field>
+        <field name="Value">C</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="L">
+      <description>Inductor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>Choke_*</fp>
+        <fp>*Coil*</fp>
+        <fp>Inductor_*</fp>
+        <fp>L_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">L</field>
+        <field name="Value">L</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="LED">
+      <description>Light emitting diode</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>LED*</fp>
+        <fp>LED_SMD:*</fp>
+        <fp>LED_THT:*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">LED</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Device" part="R">
+      <description>Resistor</description>
+      <docs>~</docs>
+      <footprints>
+        <fp>R_*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">R</field>
+        <field name="Value">R</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Diode" part="MBRA340">
+      <description>40V 3A Schottky Barrier Rectifier Diode, SMA(DO-214AC)</description>
+      <docs>https://www.onsemi.com/pub/Collateral/MBRA340T3-D.PDF</docs>
+      <footprints>
+        <fp>D*SMA*</fp>
+      </footprints>
+      <fields>
+        <field name="Reference">D</field>
+        <field name="Value">MBRA340</field>
+        <field name="Footprint">Diode_SMD:D_SMA</field>
+        <field name="Datasheet">https://www.onsemi.com/pub/Collateral/MBRA340T3-D.PDF</field>
+      </fields>
+      <pins>
+        <pin num="1" name="K" type="passive"/>
+        <pin num="2" name="A" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Jimmy_Library" part="LN60A">
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">LN60A</field>
+      </fields>
+      <pins>
+        <pin num="1" name="VDD" type="input"/>
+        <pin num="2" name="GND" type="input"/>
+        <pin num="3" name="D4" type="input"/>
+        <pin num="4" name="D3" type="input"/>
+        <pin num="5" name="D2" type="input"/>
+        <pin num="6" name="D1" type="input"/>
+      </pins>
+    </libpart>
+    <libpart lib="Jimmy_Library" part="M3_BOLT">
+      <fields>
+        <field name="Reference">Bolt</field>
+        <field name="Value">M3_BOLT</field>
+        <field name="Footprint">Jimmy_Library:M3 BOLT</field>
+      </fields>
+      <pins>
+        <pin num="1" name="BOLT" type="bidirectional"/>
+      </pins>
+    </libpart>
+    <libpart lib="Jimmy_Library" part="PW5300A">
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">PW5300A</field>
+        <field name="Footprint">Package_TO_SOT_SMD:TSOT-23-6_HandSoldering</field>
+      </fields>
+      <pins>
+        <pin num="1" name="LX" type="bidirectional"/>
+        <pin num="2" name="GND" type="bidirectional"/>
+        <pin num="3" name="FB" type="bidirectional"/>
+        <pin num="4" name="EN" type="bidirectional"/>
+        <pin num="5" name="VIN" type="bidirectional"/>
+        <pin num="6" name="OC" type="bidirectional"/>
+      </pins>
+    </libpart>
+    <libpart lib="Jimmy_Library" part="Sx70_Pogopin">
+      <fields>
+        <field name="Reference">Sx70_Pogopin</field>
+        <field name="Value">Sx70_Pogopin</field>
+        <field name="Footprint">Jimmy_Library:sx_70_pogopin</field>
+      </fields>
+      <pins>
+        <pin num="1" name="V+" type="bidirectional"/>
+        <pin num="2" name="V-" type="bidirectional"/>
+      </pins>
+    </libpart>
+    <libpart lib="Jimmy_Library" part="Tripod_hole">
+      <fields>
+        <field name="Reference">Hole</field>
+        <field name="Value">Tripod_hole</field>
+        <field name="Footprint">Jimmy_Library:Tripod_hole</field>
+      </fields>
+      <pins>
+        <pin num="1" name="Hol" type="bidirectional"/>
+      </pins>
+    </libpart>
+    <libpart lib="Jimmy_Library" part="USB-C-6P">
+      <fields>
+        <field name="Reference">USB</field>
+        <field name="Value">USB-C-6P</field>
+        <field name="Footprint">Jimmy_Library:USB-C-6</field>
+      </fields>
+      <pins>
+        <pin num="1" name="CASE" type="bidirectional"/>
+        <pin num="A5" name="CC1" type="bidirectional"/>
+        <pin num="A9" name="VBUS" type="power_out"/>
+        <pin num="A12" name="GND" type="power_out"/>
+        <pin num="B5" name="CC2" type="bidirectional"/>
+        <pin num="B9" name="VBUS" type="power_out"/>
+        <pin num="B12" name="GND" type="power_out"/>
+      </pins>
+    </libpart>
+    <libpart lib="SS12D07VG4" part="SS12D07VG4">
+      <fields>
+        <field name="Reference">S</field>
+        <field name="Value">SS12D07VG4</field>
+        <field name="Footprint">SW_SS12D07VG4</field>
+        <field name="MANUFACTURER">Shouhan</field>
+        <field name="MAXIMUM_PACKAGE_HEIGHT">8.7mm</field>
+        <field name="PARTREV">1</field>
+        <field name="STANDARD">Manufacturer Recommendations</field>
+      </fields>
+      <pins>
+        <pin num="1" name="" type="passive"/>
+        <pin num="2" name="" type="passive"/>
+        <pin num="3" name="" type="passive"/>
+        <pin num="S1" name="SHIELD" type="passive"/>
+        <pin num="S2" name="SHIELD" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="Switch" part="SW_Push">
+      <description>Push button switch, generic, two pins</description>
+      <docs>~</docs>
+      <fields>
+        <field name="Reference">SW</field>
+        <field name="Value">SW_Push</field>
+        <field name="Datasheet">~</field>
+      </fields>
+      <pins>
+        <pin num="1" name="1" type="passive"/>
+        <pin num="2" name="2" type="passive"/>
+      </pins>
+    </libpart>
+    <libpart lib="TP4057" part="TP4057">
+      <fields>
+        <field name="Reference">U</field>
+        <field name="Value">TP4057</field>
+        <field name="Footprint">SOT23-6</field>
+      </fields>
+      <pins>
+        <pin num="1" name="~{CHRG}" type="open_collector"/>
+        <pin num="2" name="GND" type="power_in"/>
+        <pin num="3" name="BAT" type="power_in"/>
+        <pin num="4" name="VCC" type="power_in"/>
+        <pin num="5" name="~{STDBY}" type="open_collector"/>
+        <pin num="6" name="PROG" type="input"/>
+      </pins>
+    </libpart>
+  </libparts>
+  <libraries>
+    <library logical="Connector">
+      <uri>C:\Program Files\KiCad\6.0\share\kicad\symbols\/Connector.kicad_sym</uri>
+    </library>
+    <library logical="Device">
+      <uri>C:\Program Files\KiCad\6.0\share\kicad\symbols\/Device.kicad_sym</uri>
+    </library>
+    <library logical="Diode">
+      <uri>C:\Program Files\KiCad\6.0\share\kicad\symbols\/Diode.kicad_sym</uri>
+    </library>
+    <library logical="Jimmy_Library">
+      <uri>C:/Users/LiuZeshu/Documents/KiCad/6.0/symbols/Jimmy_Library.kicad_sym</uri>
+    </library>
+    <library logical="SS12D07VG4">
+      <uri>C:/Users/LiuZeshu/Documents/KiCad/6.0/symbols/SS12D07VG4.kicad_sym</uri>
+    </library>
+    <library logical="Switch">
+      <uri>C:\Program Files\KiCad\6.0\share\kicad\symbols\/Switch.kicad_sym</uri>
+    </library>
+    <library logical="TP4057">
+      <uri>C:/Users/LiuZeshu/Documents/KiCad/6.0/symbols/TP4057.kicad_sym</uri>
+    </library>
+  </libraries>
+  <nets>
+    <net code="1" name="+5V">
+      <node ref="5V+1" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="C1" pin="1" pintype="passive"/>
+      <node ref="R1" pin="2" pintype="passive"/>
+      <node ref="U1" pin="4" pinfunction="VCC" pintype="power_in"/>
+      <node ref="USB1" pin="A9" pinfunction="VBUS" pintype="power_out"/>
+      <node ref="USB1" pin="B9" pinfunction="VBUS" pintype="power_out"/>
+    </net>
+    <net code="2" name="+6V">
+      <node ref="6V+1" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="C5" pin="1" pintype="passive"/>
+      <node ref="C6" pin="1" pintype="passive"/>
+      <node ref="D1" pin="1" pinfunction="K" pintype="passive"/>
+      <node ref="R2" pin="1" pintype="passive"/>
+      <node ref="Sx70_Pogopin1" pin="1" pinfunction="V+" pintype="bidirectional"/>
+    </net>
+    <net code="3" name="/BAT+">
+      <node ref="C2" pin="2" pintype="passive"/>
+      <node ref="C3" pin="1" pintype="passive"/>
+      <node ref="C4" pin="1" pintype="passive"/>
+      <node ref="L1" pin="2" pinfunction="2" pintype="passive"/>
+      <node ref="S1" pin="2" pintype="passive"/>
+      <node ref="SW1" pin="1" pinfunction="1" pintype="passive"/>
+      <node ref="U1" pin="3" pinfunction="BAT" pintype="power_in"/>
+      <node ref="U2" pin="4" pinfunction="EN" pintype="bidirectional"/>
+      <node ref="U2" pin="5" pinfunction="VIN" pintype="bidirectional"/>
+    </net>
+    <net code="4" name="GND">
+      <node ref="BAT-1" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="C1" pin="2" pintype="passive"/>
+      <node ref="C2" pin="1" pintype="passive"/>
+      <node ref="C3" pin="2" pintype="passive"/>
+      <node ref="C4" pin="2" pintype="passive"/>
+      <node ref="C5" pin="2" pintype="passive"/>
+      <node ref="C6" pin="2" pintype="passive"/>
+      <node ref="C7" pin="2" pintype="passive"/>
+      <node ref="GND1" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="GND2" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="R4" pin="2" pintype="passive"/>
+      <node ref="R_OC1" pin="2" pintype="passive"/>
+      <node ref="R_PROG1" pin="1" pintype="passive"/>
+      <node ref="S1" pin="3" pintype="passive"/>
+      <node ref="S1" pin="S1" pinfunction="SHIELD" pintype="passive"/>
+      <node ref="S1" pin="S2" pinfunction="SHIELD" pintype="passive"/>
+      <node ref="Sx70_Pogopin1" pin="2" pinfunction="V-" pintype="bidirectional"/>
+      <node ref="U1" pin="2" pinfunction="GND" pintype="power_in"/>
+      <node ref="U2" pin="2" pinfunction="GND" pintype="bidirectional"/>
+      <node ref="U3" pin="2" pinfunction="GND" pintype="input"/>
+      <node ref="USB1" pin="1" pinfunction="CASE" pintype="bidirectional"/>
+      <node ref="USB1" pin="A12" pinfunction="GND" pintype="power_out"/>
+      <node ref="USB1" pin="B12" pinfunction="GND" pintype="power_out"/>
+    </net>
+    <net code="5" name="Net-(BAT+1-Pad1)">
+      <node ref="BAT+1" pin="1" pinfunction="Pin_1" pintype="passive"/>
+      <node ref="S1" pin="1" pintype="passive"/>
+    </net>
+    <net code="6" name="Net-(C7-Pad1)">
+      <node ref="C7" pin="1" pintype="passive"/>
+      <node ref="R5" pin="1" pintype="passive"/>
+      <node ref="SW1" pin="2" pinfunction="2" pintype="passive"/>
+      <node ref="U3" pin="1" pinfunction="VDD" pintype="input"/>
+    </net>
+    <net code="7" name="Net-(CHARG1-Pad1)">
+      <node ref="CHARG1" pin="1" pinfunction="K" pintype="passive"/>
+      <node ref="U1" pin="1" pinfunction="~{CHRG}" pintype="open_collector"/>
+    </net>
+    <net code="8" name="Net-(CHARG1-Pad2)">
+      <node ref="CHARG1" pin="2" pinfunction="A" pintype="passive"/>
+      <node ref="R1" pin="1" pintype="passive"/>
+      <node ref="STDBY1" pin="2" pinfunction="A" pintype="passive"/>
+    </net>
+    <net code="9" name="Net-(D1-Pad2)">
+      <node ref="D1" pin="2" pinfunction="A" pintype="passive"/>
+      <node ref="L1" pin="1" pinfunction="1" pintype="passive"/>
+      <node ref="U2" pin="1" pinfunction="LX" pintype="bidirectional"/>
+    </net>
+    <net code="10" name="Net-(D2-Pad1)">
+      <node ref="D2" pin="1" pinfunction="K" pintype="passive"/>
+      <node ref="U3" pin="3" pinfunction="D4" pintype="input"/>
+    </net>
+    <net code="11" name="Net-(D2-Pad2)">
+      <node ref="D2" pin="2" pinfunction="A" pintype="passive"/>
+      <node ref="D3" pin="2" pinfunction="A" pintype="passive"/>
+      <node ref="D4" pin="2" pinfunction="A" pintype="passive"/>
+      <node ref="D5" pin="2" pinfunction="A" pintype="passive"/>
+      <node ref="R5" pin="2" pintype="passive"/>
+    </net>
+    <net code="12" name="Net-(D3-Pad1)">
+      <node ref="D3" pin="1" pinfunction="K" pintype="passive"/>
+      <node ref="U3" pin="4" pinfunction="D3" pintype="input"/>
+    </net>
+    <net code="13" name="Net-(D4-Pad1)">
+      <node ref="D4" pin="1" pinfunction="K" pintype="passive"/>
+      <node ref="U3" pin="5" pinfunction="D2" pintype="input"/>
+    </net>
+    <net code="14" name="Net-(D5-Pad1)">
+      <node ref="D5" pin="1" pinfunction="K" pintype="passive"/>
+      <node ref="U3" pin="6" pinfunction="D1" pintype="input"/>
+    </net>
+    <net code="15" name="Net-(R2-Pad2)">
+      <node ref="R2" pin="2" pintype="passive"/>
+      <node ref="R3" pin="2" pintype="passive"/>
+    </net>
+    <net code="16" name="Net-(R3-Pad1)">
+      <node ref="R3" pin="1" pintype="passive"/>
+      <node ref="R4" pin="1" pintype="passive"/>
+      <node ref="U2" pin="3" pinfunction="FB" pintype="bidirectional"/>
+    </net>
+    <net code="17" name="Net-(R_OC1-Pad1)">
+      <node ref="R_OC1" pin="1" pintype="passive"/>
+      <node ref="U2" pin="6" pinfunction="OC" pintype="bidirectional"/>
+    </net>
+    <net code="18" name="Net-(R_PROG1-Pad2)">
+      <node ref="R_PROG1" pin="2" pintype="passive"/>
+      <node ref="U1" pin="6" pinfunction="PROG" pintype="input"/>
+    </net>
+    <net code="19" name="Net-(STDBY1-Pad1)">
+      <node ref="STDBY1" pin="1" pinfunction="K" pintype="passive"/>
+      <node ref="U1" pin="5" pinfunction="~{STDBY}" pintype="open_collector"/>
+    </net>
+    <net code="20" name="unconnected-(Bolt1-Pad1)">
+      <node ref="Bolt1" pin="1" pinfunction="BOLT" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="21" name="unconnected-(Bolt2-Pad1)">
+      <node ref="Bolt2" pin="1" pinfunction="BOLT" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="22" name="unconnected-(Hole1-Pad1)">
+      <node ref="Hole1" pin="1" pinfunction="Hol" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="23" name="unconnected-(USB1-PadA5)">
+      <node ref="USB1" pin="A5" pinfunction="CC1" pintype="bidirectional+no_connect"/>
+    </net>
+    <net code="24" name="unconnected-(USB1-PadB5)">
+      <node ref="USB1" pin="B5" pinfunction="CC2" pintype="bidirectional+no_connect"/>
+    </net>
+  </nets>
+</export>

@@ -1,0 +1,82 @@
+%TF.GenerationSoftware,KiCad,Pcbnew,(6.0.7)*%
+%TF.CreationDate,2023-03-26T23:22:16+08:00*%
+%TF.ProjectId,sx70battery,73783730-6261-4747-9465-72792e6b6963,rev?*%
+%TF.SameCoordinates,Original*%
+%TF.FileFunction,Soldermask,Bot*%
+%TF.FilePolarity,Negative*%
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW (6.0.7)) date 2023-03-26 23:22:16*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+G04 Aperture macros list*
+%AMRoundRect*
+0 Rectangle with rounded corners*
+0 $1 Rounding radius*
+0 $2 $3 $4 $5 $6 $7 $8 $9 X,Y pos of 4 corners*
+0 Add a 4 corners polygon primitive as box body*
+4,1,4,$2,$3,$4,$5,$6,$7,$8,$9,$2,$3,0*
+0 Add four circle primitives for the rounded corners*
+1,1,$1+$1,$2,$3*
+1,1,$1+$1,$4,$5*
+1,1,$1+$1,$6,$7*
+1,1,$1+$1,$8,$9*
+0 Add four rect primitives between the rounded corners*
+20,1,$1+$1,$2,$3,$4,$5,0*
+20,1,$1+$1,$4,$5,$6,$7,0*
+20,1,$1+$1,$6,$7,$8,$9,0*
+20,1,$1+$1,$8,$9,$2,$3,0*%
+G04 Aperture macros list end*
+%ADD10C,2.000000*%
+%ADD11O,1.100000X1.700000*%
+%ADD12RoundRect,1.680000X-0.420000X-0.820000X0.420000X-0.820000X0.420000X0.820000X-0.420000X0.820000X0*%
+%ADD13C,2.500000*%
+%ADD14R,1.308000X1.308000*%
+%ADD15C,1.308000*%
+%ADD16O,2.460000X1.230000*%
+%ADD17C,10.000000*%
+G04 APERTURE END LIST*
+D10*
+%TO.C,SW1*%
+X124900000Y-62200000D03*
+X124900000Y-55700000D03*
+X129400000Y-62200000D03*
+X129400000Y-55700000D03*
+%TD*%
+D11*
+%TO.C,USB1*%
+X145680000Y-122400000D03*
+X154320000Y-122400000D03*
+X145680000Y-118600000D03*
+X154320000Y-118600000D03*
+%TD*%
+D12*
+%TO.C,Bolt2*%
+X175000000Y-51000000D03*
+%TD*%
+D13*
+%TO.C,Sx70_Pogopin1*%
+X133500000Y-61200000D03*
+X169500000Y-61200000D03*
+%TD*%
+D14*
+%TO.C,S1*%
+X130810000Y-97060000D03*
+D15*
+X130810000Y-99060000D03*
+X130810000Y-101060000D03*
+D16*
+X130810000Y-94860000D03*
+X130810000Y-103260000D03*
+%TD*%
+D17*
+%TO.C,Hole1*%
+X150000000Y-100000000D03*
+%TD*%
+D12*
+%TO.C,Bolt1*%
+X122000000Y-51000000D03*
+%TD*%
+M02*
