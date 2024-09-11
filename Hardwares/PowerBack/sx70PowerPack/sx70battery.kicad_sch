@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "Powerpack for SX70 ")
-		(date "2024-09-10")
-		(rev "2")
+		(date "2024-09-11")
+		(rev "2.1")
 		(company "SX-70 Mk2 Project")
 		(comment 1 "ZS Liu")
 	)
@@ -3171,13 +3171,19 @@
 		(uuid "d1daf319-0d59-43e4-9f28-a4524620997c")
 	)
 	(junction
+		(at 166.37 57.15)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "e2602684-0539-45a1-8241-e4ad7d6da985")
+	)
+	(junction
 		(at 39.37 135.255)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "f590dec4-6bf7-4845-9816-d28475c83b21")
 	)
 	(junction
-		(at 148.59 57.15)
+		(at 142.24 55.88)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "fc99d60c-9c74-4752-884d-ad1fba4a8133")
@@ -3197,14 +3203,6 @@
 	(no_connect
 		(at 199.39 36.83)
 		(uuid "3de23db2-f85b-4999-9cd5-87dc7a95fe0e")
-	)
-	(no_connect
-		(at 171.45 41.91)
-		(uuid "7482c2ec-909d-4f20-bbce-73835837758c")
-	)
-	(no_connect
-		(at 171.45 44.45)
-		(uuid "ff50871c-c3df-4ab0-88d7-90e3b1e1f00e")
 	)
 	(wire
 		(pts
@@ -3235,6 +3233,16 @@
 			(type default)
 		)
 		(uuid "02db0829-747c-4ace-8eba-dc4bc8bdbb74")
+	)
+	(wire
+		(pts
+			(xy 165.1 40.64) (xy 176.53 40.64)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "03e65965-8c21-4c52-9846-f9ec0445df05")
 	)
 	(wire
 		(pts
@@ -3298,7 +3306,7 @@
 	)
 	(wire
 		(pts
-			(xy 148.59 59.69) (xy 148.59 57.15)
+			(xy 142.24 58.42) (xy 142.24 55.88)
 		)
 		(stroke
 			(width 0)
@@ -3335,6 +3343,16 @@
 			(type default)
 		)
 		(uuid "1bad7387-450f-4036-bedf-e8018c108120")
+	)
+	(wire
+		(pts
+			(xy 166.37 43.18) (xy 165.1 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "24907e09-76d4-4459-b8a9-2df37dbc02f7")
 	)
 	(wire
 		(pts
@@ -3418,7 +3436,17 @@
 	)
 	(wire
 		(pts
-			(xy 148.59 57.15) (xy 156.21 57.15)
+			(xy 166.37 58.42) (xy 166.37 57.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3374b46e-bdfb-409c-a355-9a747721454b")
+	)
+	(wire
+		(pts
+			(xy 142.24 55.88) (xy 149.86 55.88)
 		)
 		(stroke
 			(width 0)
@@ -3438,7 +3466,7 @@
 	)
 	(wire
 		(pts
-			(xy 156.21 54.61) (xy 156.21 57.15)
+			(xy 149.86 53.34) (xy 149.86 55.88)
 		)
 		(stroke
 			(width 0)
@@ -3608,6 +3636,16 @@
 	)
 	(wire
 		(pts
+			(xy 166.37 57.15) (xy 176.53 57.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5ccaf499-1ff7-4d2c-ab5d-42ccfb39ed30")
+	)
+	(wire
+		(pts
 			(xy 70.485 133.985) (xy 70.485 135.255)
 		)
 		(stroke
@@ -3698,6 +3736,16 @@
 	)
 	(wire
 		(pts
+			(xy 166.37 46.99) (xy 166.37 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6960da6d-9746-44ed-b002-7a3692775a6b")
+	)
+	(wire
+		(pts
 			(xy 48.26 144.145) (xy 61.595 144.145)
 		)
 		(stroke
@@ -3748,6 +3796,16 @@
 	)
 	(wire
 		(pts
+			(xy 176.53 54.61) (xy 176.53 57.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "77f878bb-73ac-48e9-91ed-b316f5bbe71f")
+	)
+	(wire
+		(pts
 			(xy 51.435 150.495) (xy 69.215 150.495)
 		)
 		(stroke
@@ -3755,6 +3813,16 @@
 			(type default)
 		)
 		(uuid "79f65b7d-e124-46b0-b532-53ce5e7a418f")
+	)
+	(wire
+		(pts
+			(xy 176.53 40.64) (xy 176.53 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7b794697-3d36-47eb-8d6f-56bf16e32d07")
 	)
 	(wire
 		(pts
@@ -4148,7 +4216,7 @@
 	)
 	(wire
 		(pts
-			(xy 175.26 29.21) (xy 171.45 29.21)
+			(xy 168.91 27.94) (xy 165.1 27.94)
 		)
 		(stroke
 			(width 0)
@@ -4288,7 +4356,7 @@
 	)
 	(wire
 		(pts
-			(xy 148.59 57.15) (xy 148.59 54.61)
+			(xy 142.24 55.88) (xy 142.24 53.34)
 		)
 		(stroke
 			(width 0)
@@ -4418,7 +4486,7 @@
 	)
 	(wire
 		(pts
-			(xy 175.26 26.67) (xy 175.26 29.21)
+			(xy 168.91 25.4) (xy 168.91 27.94)
 		)
 		(stroke
 			(width 0)
@@ -4475,6 +4543,16 @@
 			(type default)
 		)
 		(uuid "f8d46868-d746-48e6-8f58-8a4cdfa80ada")
+	)
+	(wire
+		(pts
+			(xy 166.37 57.15) (xy 166.37 54.61)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fc18dd48-7699-40a8-a2c2-e749105cc88a")
 	)
 	(wire
 		(pts
@@ -5295,6 +5373,76 @@
 	)
 	(symbol
 		(lib_id "Device:R")
+		(at 166.37 50.8 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "1f3edbf4-ec62-42b8-86fd-1ec0fc4bf79a")
+		(property "Reference" "R10"
+			(at 168.91 49.5299 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "5.1k"
+			(at 168.91 52.0699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
+			(at 168.148 50.8 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 166.37 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 166.37 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "aa91b5d1-ab33-48cd-9fee-877328346eab")
+		)
+		(pin "2"
+			(uuid "1391b526-f7b1-4cef-ada1-c45d3060f4f1")
+		)
+		(instances
+			(project "sx70battery"
+				(path "/936b6ac4-5d94-4c55-9523-df753763e3eb"
+					(reference "R10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
 		(at 38.1 49.53 180)
 		(unit 1)
 		(exclude_from_sim no)
@@ -5365,7 +5513,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 148.59 59.69 0)
+		(at 142.24 58.42 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -5374,7 +5522,7 @@
 		(fields_autoplaced yes)
 		(uuid "24e3d4f0-da70-41a0-90cb-6c127e102428")
 		(property "Reference" "#PWR09"
-			(at 148.59 66.04 0)
+			(at 142.24 64.77 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5383,7 +5531,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 148.59 64.77 0)
+			(at 142.24 63.5 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5391,7 +5539,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 148.59 59.69 0)
+			(at 142.24 58.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5400,7 +5548,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 148.59 59.69 0)
+			(at 142.24 58.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5409,7 +5557,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 148.59 59.69 0)
+			(at 142.24 58.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5498,7 +5646,7 @@
 	)
 	(symbol
 		(lib_id "power:+5V")
-		(at 175.26 26.67 0)
+		(at 168.91 25.4 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -5507,7 +5655,7 @@
 		(fields_autoplaced yes)
 		(uuid "282a6c44-8c77-431a-b501-c05373a58af5")
 		(property "Reference" "#PWR010"
-			(at 175.26 30.48 0)
+			(at 168.91 29.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5516,7 +5664,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 175.26 20.955 0)
+			(at 168.91 19.685 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5524,7 +5672,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 175.26 26.67 0)
+			(at 168.91 25.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5533,7 +5681,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 175.26 26.67 0)
+			(at 168.91 25.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5542,7 +5690,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 175.26 26.67 0)
+			(at 168.91 25.4 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6583,6 +6731,72 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 166.37 58.42 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "57b25cf0-44dd-4650-bd7b-ffc06205769a")
+		(property "Reference" "#PWR015"
+			(at 166.37 64.77 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 166.37 63.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 166.37 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 166.37 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 166.37 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "e8e241c1-d73f-441a-91ba-0b5e6839b55c")
+		)
+		(instances
+			(project "sx70battery"
+				(path "/936b6ac4-5d94-4c55-9523-df753763e3eb"
+					(reference "#PWR015")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector:Conn_01x01_Female")
 		(at 198.12 16.51 270)
 		(mirror x)
@@ -7295,7 +7509,7 @@
 	)
 	(symbol
 		(lib_id "Connector:USB_C_Receptacle_PowerOnly_6P")
-		(at 156.21 36.83 0)
+		(at 149.86 35.56 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -7304,7 +7518,7 @@
 		(fields_autoplaced yes)
 		(uuid "8d0e6c23-0e5e-43cb-8f85-b8796d75006e")
 		(property "Reference" "J1"
-			(at 156.21 19.05 0)
+			(at 149.86 17.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7312,7 +7526,7 @@
 			)
 		)
 		(property "Value" "USB_C_Receptacle_PowerOnly_6P"
-			(at 156.21 21.59 0)
+			(at 149.86 20.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7320,7 +7534,7 @@
 			)
 		)
 		(property "Footprint" "Connector_USB:USB_C_Receptacle_GCT_USB4125-xx-x-0190_6P_TopMnt_Horizontal"
-			(at 160.02 34.29 0)
+			(at 153.67 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7329,7 +7543,7 @@
 			)
 		)
 		(property "Datasheet" "https://www.usb.org/sites/default/files/documents/usb_type-c.zip"
-			(at 156.21 36.83 0)
+			(at 149.86 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7338,7 +7552,7 @@
 			)
 		)
 		(property "Description" "USB Power-Only 6P Type-C Receptacle connector"
-			(at 156.21 36.83 0)
+			(at 149.86 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8771,6 +8985,76 @@
 			(project "sx70battery"
 				(path "/936b6ac4-5d94-4c55-9523-df753763e3eb"
 					(reference "#PWR011")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 176.53 50.8 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d4591eb1-656a-4a41-ab7d-3e34ef2cc07d")
+		(property "Reference" "R11"
+			(at 179.07 49.5299 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "5.1k"
+			(at 179.07 52.0699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
+			(at 178.308 50.8 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 176.53 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 176.53 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "a5c07f60-85e9-4162-9464-a9efe203bd21")
+		)
+		(pin "2"
+			(uuid "2bf61e37-1581-4d92-b3a3-14bec40461ad")
+		)
+		(instances
+			(project "sx70battery"
+				(path "/936b6ac4-5d94-4c55-9523-df753763e3eb"
+					(reference "R11")
 					(unit 1)
 				)
 			)
