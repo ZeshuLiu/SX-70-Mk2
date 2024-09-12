@@ -1,29 +1,29 @@
 # SX-70 Mk2
 
 ## 介绍
-针对SX-70 Sonnar相机的现代化改造，在保留原本机身的自动功能的情况下，提供更直接的手动控制方式，能够更加自由地进行拍摄。使用测光表可以更加自由地对曝光进行控制，从而控制自己的拍摄效果。**机身控制器的存在使得手动控制更加直观、方便** \
+针对SX-70 Sonnar相机的现代化改造，在保留原本机身的自动功能的情况下，提供更直接的手动控制方式，能够更加自由地进行拍摄。使用测光表可以更加自由地对曝光进行控制，从而控制自己的拍摄效果。**机身控制器的存在使得手动控制更加直观、方便** 
 
 ### 项目组成
 
 项目中包含几个部分的硬件：
 
-1. [相机主控板](https://github.com/ZeshuLiu/SX-70-Mk2/tree/main/Hardwares/MainController)：替换相机机头内原装的控制器，接管相机的控制。 \
-2. [机身控制器](https://github.com/ZeshuLiu/SX-70-Mk2/tree/main/Hardwares/Body_controller)：显示当前相机工作状态并提供用于交互的按键。粘贴在机身背部，不会增加相机高度，因此大部分相机包依旧可以通用。 \
-3. [闪光灯接口](https://github.com/ZeshuLiu/SX-70-Mk2/tree/main/Hardwares/Flash_Plug)：**(还未实际测试)**，从原本的闪光灯排上引出3.5mm接口，用于外置闪光灯。 \
-4. [机身电池](https://github.com/ZeshuLiu/SX-70-Mk2/tree/main/Hardwares/PowerBack)：**(正在开发中)**，通过相机底部的两个触点为相机供电，可以使用iType相纸进行拍摄。 \
+1. [相机主控板](https://github.com/ZeshuLiu/SX-70-Mk2/tree/main/Hardwares/MainController)：替换相机机头内原装的控制器，接管相机的控制。
+2. [机身控制器](https://github.com/ZeshuLiu/SX-70-Mk2/tree/main/Hardwares/Body_controller)：显示当前相机工作状态并提供用于交互的按键。粘贴在机身背部，不会增加相机高度，因此大部分相机包依旧可以通用。
+3. [闪光灯接口](https://github.com/ZeshuLiu/SX-70-Mk2/tree/main/Hardwares/Flash_Plug)：**(还未实际测试)**，从原本的闪光灯排上引出3.5mm接口，用于外置闪光灯。
+4. [机身电池](https://github.com/ZeshuLiu/SX-70-Mk2/tree/main/Hardwares/PowerBack)：**(正在开发中)**，通过相机底部的两个触点为相机供电，可以使用iType相纸进行拍摄。
 
 ### 开发
 
-大部分印制线路板使用KiCad8进行绘制，极少部分使用其它软件，仓库均提供了相应的工程和光绘(gerber)文件。 \
+大部分印制线路板使用KiCad8进行绘制，极少部分使用其它软件，仓库均提供了相应的工程和光绘(gerber)文件。
 
 Rev1.x - Rev2.x 版本的主控使用RP2040，通过micropython编程。由于micropython中硬件定时器最小单位为1ms，后续考虑换用C语言获得更高定时器配置精度。
 
 ### 项目使用的开源软件
 
-1. 项目受到了[OPSX ](https://github.com/sunyitong/OPSX)和[openSX70](https://github.com/openSX70)的启发。 \
-2. Rev1.x - Rev2.x 版本的128x32OLED屏幕代码：[micropython-adafruit-ssd1306 ](https://github.com/adafruit/micropython-adafruit-ssd1306) \
-3. 机身控制器按键使用的PCF8575：[micropython-pcf8575 ](https://github.com/mcauser/micropython-pcf8575)\
-4. Rev1.x-Rev2.x 主控使用的tsl2561光线传感器：[micropython-adafruit-tsl2561](https://github.com/adafruit/micropython-adafruit-tsl2561)
+1. 项目受到了[OPSX ](https://github.com/sunyitong/OPSX)和[openSX70](https://github.com/openSX70)的启发。
+2. Rev1.x - Rev2.x 版本的128x32OLED屏幕代码：[micropython-adafruit-ssd1306 ](https://github.com/adafruit/micropython-adafruit-ssd1306)
+3. 机身控制器按键使用的PCF8575：[micropython-pcf8575 ](https://github.com/mcauser/micropython-pcf8575)
+4. Rev1.x-Rev2.x 主控使用的tsl2561光线传感器：[micropython-adafruit-tsl256](https://github.com/adafruit/micropython-adafruit-tsl2561)
 
 
 
