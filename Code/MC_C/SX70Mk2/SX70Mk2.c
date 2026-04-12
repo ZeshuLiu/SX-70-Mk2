@@ -11,22 +11,12 @@
 #include "drivers/led.h"
 #include "drivers/tsl2561.h"
 #include "pins.h"
+#include "metering.h"
 
 // 设备实例
 static pcf8575_t pcf;
 static ssd1306_t oled;
-static tsl2561_t lm;  // 测光表
-
-// 快门速度表 (Python 程序中的 M_CMD_Dict)
-// ev6=1s, ev7=1/2, ev8=1/4, ev85=1/6, ev9=1/8, ev95=1/10, ev10=1/15, ev105=1/20
-// ev11=1/30, ev115=1/45, ev12=1/60, ev125=1/90, ev13=1/125, ev135=1/180
-// ev14=1/250, ev145=1/360, ev15=1/500, ev16=1/1000, ev17=1/2000
-static const char *shutter_speeds[] = {
-    "1s", "1/2", "1/3", "1/4", "1/6", "1/8", "1/10", "1/15", "1/20",
-    "1/30", "1/45", "1/60", "1/90", "1/125", "1/180", "1/250", "1/360",
-    "1/500", "1/1000", "1/2000"
-};
-#define SHUTTER_SPEED_COUNT 20
+tsl2561_t lm;  // 测光表 (暴露给 metering.c)
 
 // 相机状态 - 对应 Python Button3D 类
 typedef struct {
@@ -36,9 +26,14 @@ typedef struct {
     char cam_mode[6];       // 当前模式字符串
     float last_lux;         // 上次测光值 (浮点数)
     uint8_t auto_shutter_pos; // AUTO 档计算的快门位置
+    char shut_mode;         // 快门模式：'0'=闪光，'1'=正常，'B'=B 门，'T'=T 门
+    uint8_t shutter_speed;  // 当前快门速度索引
 } camera_state_t;
 
-static camera_state_t g_state = {0, 0, 0, "", 0, 0};
+static camera_state_t g_state = {0, 0, 0, "", 0, 0, '1', 1};
+
+// 对焦状态 (对应 Python if_focused)
+static uint8_t if_focused = 0;
 
 // 3D 按键状态 - 完全对应 Python
 typedef struct {
@@ -53,73 +48,8 @@ static button3d_state_t g_btn3d = {"111", 0, 0};
 static const uint8_t timer_list[] = {0, 3, 5, 10};
 #define TIMER_LIST_SIZE 4
 
-// 根据 LUX 值计算快门速度 (ISO 600)
-// Python 代码：camera_driver.py light_meter() 函数
-// 传入的 lux 已经是调整后的值：(lux_raw - 0.4) * 0.9
-// 返回值是快门速度在 shutter_speeds 数组中的索引 (1-19 对应 ev7-ev17)
-uint8_t calc_shutter_from_lux(float lux) {
-    // Python 中的阈值判断 (完全对应)
-    // lux <= 0.120 返回 ev7 (1/2s) - 对应索引 1
-    if (lux <= 0.120f) return 1;   // ev7 (1/2s)
-    if (lux <= 0.125f) return 2;   // ev75 (1/3s)
-    if (lux <= 0.1385f) return 3;  // ev8 (1/4s)
-    if (lux <= 0.152f) return 4;   // ev85 (1/6s)
-    if (lux <= 0.185f) return 5;   // ev9 (1/8s)
-    if (lux <= 0.22f) return 6;    // ev95 (1/10s)
-    if (lux <= 0.275f) return 7;   // ev10 (1/15s)
-    if (lux <= 0.345f) return 8;   // ev105 (1/20s)
-    if (lux <= 0.468f) return 9;   // ev11 (1/30s)
-    if (lux <= 0.58f) return 10;   // ev115 (1/45s)
-    if (lux <= 0.802f) return 11;  // ev12 (1/60s)
-    if (lux <= 1.115f) return 12;  // ev125 (1/90s)
-    if (lux <= 1.6f) return 13;    // ev13 (1/125s)
-    if (lux <= 2.35f) return 14;   // ev135 (1/180s)
-    if (lux <= 3.4f) return 15;    // ev14 (1/250s)
-    if (lux <= 4.2f) return 16;    // ev145 (1/360s)
-    if (lux <= 10.0f) return 17;   // ev15 (1/500s)
-    if (lux <= 100.0f) return 18;  // ev16 (1/1000s)
-    return 19; // ev17 (1/2000s)
-}
-
-// 测光函数 (完全对应 Python light_meter())
-float do_meter() {
-    float lux_sum = 0.0f;
-    int valid_count = 0;
-
-    // Python: 连续读取 7 次取平均
-    // tsl2561_read_lux() 内部已经处理了自动增益切换
-    for (int i = 0; i < 7; i++) {
-        float lux = tsl2561_read_lux(&lm);
-        // 检查是否饱和（返回 -1.0f 表示饱和）
-        if (lux >= 0.0f) {
-            lux_sum += lux;
-            valid_count++;
-        }
-        if (i < 6) sleep_ms(1);
-    }
-
-    if (valid_count == 0) {
-        g_state.last_lux = 0.0f;
-        g_state.auto_shutter_pos = 1;  // ev7 (1/2s) 最暗
-        return 0.0f;
-    }
-
-    float lux_avg = lux_sum / valid_count;
-
-    // Python: lux -= 0.4; lux *= 0.9
-    float lux_adj = (lux_avg - 0.4f) * 0.9f;
-    if (lux_adj < 0.0f) lux_adj = 0.0f;
-
-    g_state.last_lux = lux_adj;
-
-    // 计算 AUTO 档的快门速度
-    g_state.auto_shutter_pos = calc_shutter_from_lux(lux_adj);
-    if (g_state.auto_shutter_pos >= SHUTTER_SPEED_COUNT) {
-        g_state.auto_shutter_pos = SHUTTER_SPEED_COUNT - 1;
-    }
-
-    return lux_adj;
-}
+// S1F 半按快门对焦检测
+static uint8_t s1f_last = 1;  // 上次 S1F 状态 (1=未按下，0=按下)
 
 void enter_bootloader() {
     reset_usb_boot(0, 0);
@@ -145,10 +75,55 @@ void update_mode_display() {
     } else if (g_state.menu == 2) {
         snprintf(g_state.cam_mode, sizeof(g_state.cam_mode), "T");
     } else if (g_state.menu == 3) {
-        snprintf(g_state.cam_mode, sizeof(g_state.cam_mode), "%s", shutter_speeds[g_state.m_pos]);
+        snprintf(g_state.cam_mode, sizeof(g_state.cam_mode), "%s", get_shutter_speed(g_state.m_pos));
     } else if (g_state.menu == 10) {
         snprintf(g_state.cam_mode, sizeof(g_state.cam_mode), "---");
     }
+}
+
+// 对焦函数 (对应 Python Focus)
+// 返回值：shut_mode (快门模式), shutter_speed (快门速度)
+void do_focus(char *shut_mode, uint8_t *shutter_speed) {
+    // 设置对焦标志
+    if_focused = 1;
+    // 设置 S1F 反馈引脚为高电平 (对应 Python S1F_FBW.value(1))
+    gpio_put(S1F_FBW_PIN, 1);
+
+    // 根据当前菜单模式决定对焦行为
+    if (g_state.menu == 0) {
+        // A 档 (Auto) - 自动测光决定快门速度
+        *shut_mode = '1';  // 正常模式
+        do_meter(&g_state.last_lux, &g_state.auto_shutter_pos);
+        *shutter_speed = g_state.auto_shutter_pos;
+    } else if (g_state.menu == 1) {
+        // B 档 (Bulb)
+        *shut_mode = 'B';
+        *shutter_speed = 1;  // ev7 (1/2s)
+    } else if (g_state.menu == 2) {
+        // T 档 (Time)
+        *shut_mode = 'T';
+        *shutter_speed = 1;  // ev7 (1/2s)
+    } else if (g_state.menu == 3) {
+        // M 档 (Manual) - 使用手动设置的快门速度
+        *shut_mode = '1';  // 正常模式
+        *shutter_speed = g_state.m_pos;
+        // M 档也进行测光（但不使用结果）
+        do_meter(&g_state.last_lux, &g_state.auto_shutter_pos);
+    } else {
+        // 自拍等其他模式
+        *shut_mode = '1';
+        *shutter_speed = 1;
+    }
+
+    printf("Focus: mode=%c, shutter=%s\r\n", *shut_mode, get_shutter_speed(*shutter_speed));
+}
+
+// 松开对焦 (对应 Python 中松开 S1F 的处理)
+void do_focus_release() {
+    if_focused = 0;
+    // 设置 S1F 反馈引脚为低电平 (对应 Python S1F_FBW.value(0))
+    gpio_put(S1F_FBW_PIN, 0);
+    printf("Focus Release\r\n");
 }
 
 // 下键按下回调
@@ -258,7 +233,7 @@ void show_frame() {
 
     // 快门速度大字 (AUTO 档显示计算的快门，M 档显示手动设置的)
     uint8_t shutter_index = (g_state.menu == 0) ? g_state.auto_shutter_pos : g_state.m_pos;
-    ssd1306_draw_str(&oled, 8, 18, shutter_speeds[shutter_index], &font5x8_font);
+    ssd1306_draw_str(&oled, 8, 18, get_shutter_speed(shutter_index), &font5x8_font);
 
     // 显示 LUX 值 (右下角)
     char lux_str[16];
@@ -318,6 +293,16 @@ int main() {
 
     printf("\r\n=== SX-70 Mk2 启动 ===\r\n");
 
+    // 初始化引脚
+    gpio_init(S1F_PIN);
+    gpio_set_dir(S1F_PIN, GPIO_IN);
+    gpio_pull_up(S1F_PIN);
+
+    // S1F 反馈引脚 (对应 Python S1F_FBW)
+    gpio_init(S1F_FBW_PIN);
+    gpio_set_dir(S1F_FBW_PIN, GPIO_OUT);
+    gpio_put(S1F_FBW_PIN, 0);  // 初始为低电平
+
     // 初始化
     led_init();
     pcf8575_init_system();
@@ -343,13 +328,30 @@ int main() {
         enter_bootloader();
     }
 
-    // 主循环
+    // 主循环 (对应 Python Cam_Operation)
     while (true) {
         button3d_handler();
 
-        // AUTO 模式下进行测光
-        if (g_state.menu == 0) {
-            do_meter();
+        // 读取 S1F (半按快门) 状态
+        uint8_t s1f = gpio_get(S1F_PIN);
+
+        // 半按快门对焦 (对应 Python: if foc == self.Red_Button_Pressed and self.if_focused == False)
+        if (s1f == 0 && if_focused == 0) {
+            if (g_state.menu == 10) {
+                printf("不在拍摄模式\r\n");
+            } else {
+                do_focus(&g_state.shut_mode, &g_state.shutter_speed);
+            }
+        }
+
+        // 松开半按快门 (对应 Python: if foc != self.Red_Button_Pressed and self.if_focused == True)
+        if (s1f != 0 && if_focused == 1) {
+            do_focus_release();
+        }
+
+        // AUTO 模式 并且 处于对焦状态下 进行测光
+        if (g_state.menu == 0 && if_focused == 0) {
+            do_meter(&g_state.last_lux, &g_state.auto_shutter_pos);
         }
 
         show_frame();
@@ -357,12 +359,12 @@ int main() {
         // 打印按键状态和测光数据
         read_3d_button_pins(btn);
         if (g_state.menu == 0) {
-            printf("3D Button: up=%c down=%c mid=%c | Menu=%d Mode=%s | LUX=%.2f Shutter=%s\r\n",
-                    btn[0], btn[1], btn[2], g_state.menu, g_state.cam_mode,
-                    g_state.last_lux, shutter_speeds[g_state.auto_shutter_pos]);
+            printf("S1F=%d Focused=%d | Menu=%d Mode=%s | LUX=%.2f Shutter=%s\r\n",
+                    s1f, if_focused, g_state.menu, g_state.cam_mode,
+                    g_state.last_lux, get_shutter_speed(g_state.auto_shutter_pos));
         } else {
-            printf("3D Button: up=%c down=%c mid=%c | Menu=%d Mode=%s\r\n",
-                    btn[0], btn[1], btn[2], g_state.menu, g_state.cam_mode);
+            printf("S1F=%d Focused=%d | Menu=%d Mode=%s\r\n",
+                    s1f, if_focused, g_state.menu, g_state.cam_mode);
         }
         sleep_ms(100);
     }

@@ -64,6 +64,7 @@ target_include_directories(SX70Mk2 PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
         ${CMAKE_CURRENT_LIST_DIR}/src
         ${CMAKE_CURRENT_LIST_DIR}/src/drivers
+        ${CMAKE_CURRENT_LIST_DIR}/camera
 )
 
 # Add driver source files
@@ -72,6 +73,7 @@ target_sources(SX70Mk2 PRIVATE
         src/drivers/led.c
         src/drivers/ssd1306.c
         src/drivers/tsl2561.c
+        camera/metering.c
 )
 
 pico_add_extra_outputs(SX70Mk2)
