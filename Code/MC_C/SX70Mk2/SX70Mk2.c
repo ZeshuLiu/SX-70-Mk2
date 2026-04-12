@@ -328,7 +328,7 @@ void tsl2561_init_system() {
 
 int main() {
     stdio_init_all();
-    sleep_ms(3000);
+    sleep_ms(300);
 
     printf("\r\n=== SX-70 Mk2 启动 ===\r\n");
 
@@ -380,7 +380,7 @@ int main() {
     ssd1306_draw_str(&oled, 10, 10, "SX-70 Mk2", &font5x8_font);
     ssd1306_draw_str(&oled, 5, 22, "Starting...", &font5x8_font);
     ssd1306_show(&oled);
-    sleep_ms(1000);
+    sleep_ms(100);
 
     button3d_handler();
     // 打印按键状态
@@ -424,6 +424,9 @@ int main() {
 
         // 全按快门拍摄 (对应 Python: if tak == self.Red_Button_Pressed)
         if (s1t == 1) {
+            // gpio_put(LED_Y_PIN, 0);  // 强制高电平
+            // gpio_put(LED_B_PIN, 1);
+            led_close();
             if (g_state.menu == 10) {
                 printf("不在拍摄模式\r\n");
             } else {

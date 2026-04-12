@@ -14,6 +14,9 @@
 // 快门 PWM 切片号
 static uint shutter_pwm_slice, shutter_channel_num;
 
+// 光圈 PWM 切片号
+static uint aperture_pwm_slice, aperture_channel_num;
+
 // 定时器回调标识
 static volatile bool shutter_timer_fired = false;
 
@@ -50,12 +53,20 @@ void shutter_init(void) {
 
     pwm_set_clkdiv(shutter_pwm_slice, 4.0f);
 
-    // 初始状态：快门关闭 (duty=65535)
-    // Python: duty_u16(0) = 开启快门，duty_u16(65535) = 关闭快门
-    // pwm_set_gpio_level(SHUTTER_PIN, 0);  // 初始开启状态
-
     // 使能 PWM
     pwm_set_enabled(shutter_pwm_slice, true);
+
+    // 初始化光圈 PWM (70kHz)
+    // Python: aperture.freq(70000)
+    gpio_set_function(APERTURE_PIN, GPIO_FUNC_PWM);
+    aperture_pwm_slice = pwm_gpio_to_slice_num(APERTURE_PIN);
+    aperture_channel_num = pwm_gpio_to_channel(APERTURE_PIN);
+
+    // 70kHz: wrap=999, div = 125MHz / (70kHz × 1000) ≈ 1.786
+    pwm_set_wrap(aperture_pwm_slice, 999);
+    pwm_set_clkdiv(aperture_pwm_slice, 1.786f);
+    pwm_set_chan_level(aperture_pwm_slice, aperture_channel_num, 0);  // 初始关闭
+    pwm_set_enabled(aperture_pwm_slice, true);
 }
 
 void shutter_close(void) {
@@ -71,6 +82,16 @@ void shutter_open(void) {
 void shutter_keep_closed(void) {
     // 保持快门关闭 (对应 Python duty_u16(30000))
     pwm_set_chan_level(shutter_pwm_slice, shutter_channel_num, 1000);
+}
+
+void aperture_engage(void) {
+    // 光圈就位 (对应 Python duty_u16(65535))
+    pwm_set_chan_level(aperture_pwm_slice, aperture_channel_num, 1000);
+}
+
+void aperture_disengage(void) {
+    // 光圈归位 (对应 Python duty_u16(0))
+    pwm_set_chan_level(aperture_pwm_slice, aperture_channel_num, 0);
 }
 
 void shutter_expose(uint16_t shutter_delay_x10, char mode) {
@@ -98,7 +119,12 @@ void shutter_expose(uint16_t shutter_delay_x10, char mode) {
     gpio_put(MOTOR_PIN, 0);
     printf("Motor Stoped!\r\n");
 
-    // Y Delay (光圈就位 + 自拍延时) - 暂不实现闪光灯
+    // Y Delay (光圈就位 + 自拍延时)
+    if (mode == SHUTTER_FLASH) {
+        // 闪光模式：光圈就位
+        aperture_engage();
+        printf("Aperture engaged (Flash mode)\r\n");
+    }
     sleep_ms(18);  // 基础 Y delay
 
     // 开启快门，曝光开始
@@ -176,6 +202,12 @@ void shutter_expose(uint16_t shutter_delay_x10, char mode) {
     shutter_keep_closed();
     printf("Shutter Closed. Exposure Finished\r\n");
     sleep_ms(18);
+
+    // 光圈归位
+    if (mode == SHUTTER_FLASH) {
+        aperture_disengage();
+        printf("Aperture disengaged\r\n");
+    }
 
     // 电机启动，开始吐片
     gpio_put(MOTOR_PIN, 1);

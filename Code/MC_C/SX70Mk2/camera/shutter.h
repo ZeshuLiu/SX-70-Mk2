@@ -59,6 +59,16 @@ uint16_t shutter_bulb_mode(uint8_t s1t_pin);
  */
 uint16_t shutter_time_mode(uint8_t s1t_pin);
 
+/**
+ * @brief 光圈就位 (闪光模式用)
+ */
+void aperture_engage(void);
+
+/**
+ * @brief 光圈归位
+ */
+void aperture_disengage(void);
+
 #ifdef __cplusplus
 }
 #endif
