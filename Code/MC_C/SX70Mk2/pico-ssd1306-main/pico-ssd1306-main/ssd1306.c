@@ -8,6 +8,7 @@
 #include <string.h>
 #include <hardware/i2c.h>
 #include "ssd1306.h"
+#include "lib/image.h"
 
 static const uint8_t SET_CONTRAST = 0x81;
 static const uint8_t SET_ENTIRE_ON = 0xA4;
@@ -328,6 +329,17 @@ void ssd1306_draw_str(ssd1306_t *dev, int x, int y, const char *str, const ssd13
     draw_char(dev, x, y, str, font);
     x += font->width;
   } while (*(++str));
+}
+
+void ssd1306_draw_image(ssd1306_t *dev, uint16_t x, uint16_t y, const ssd1306_image_t *image) {
+  for (uint16_t j = 0; j < image->height; j++) {
+    for (uint16_t i = 0; i < image->width; i++) {
+      size_t byte_index = (i + j * image->width) / 8;
+      uint8_t bit_index = 7 - (i % 8);
+      bool pixel_on = (image->data[byte_index] >> bit_index) & 0x01u;
+      draw_pixel(dev, x + i, y + j, pixel_on);
+    }
+  }
 }
 
 void ssd1306_scroll_horiz(ssd1306_t *dev, bool right, uint8_t start_page, uint8_t end_page, uint8_t speed) {

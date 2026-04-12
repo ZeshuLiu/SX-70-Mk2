@@ -17,7 +17,7 @@ else()
 endif()
 set(sdkVersion 2.2.0)
 set(toolchainVersion 14_2_Rel1)
-set(picotoolVersion 2.2.0)
+set(picotoolVersion 2.2.0-a4)
 set(picoVscode ${USERHOME}/.pico-sdk/cmake/pico-vscode.cmake)
 if (EXISTS ${picoVscode})
     include(${picoVscode})
@@ -28,49 +28,36 @@ set(PICO_BOARD pico CACHE STRING "Board type")
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
 
-project(SX70Mk2 C CXX ASM)
+project(example C CXX ASM)
 
 # Initialise the Raspberry Pi Pico SDK
 pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(SX70Mk2 SX70Mk2.c )
+add_executable(example
+    example.c
+    ssd1306.c
+    )
 
-pico_set_program_name(SX70Mk2 "SX70Mk2")
-pico_set_program_version(SX70Mk2 "0.1")
+pico_set_program_name(example "example")
+pico_set_program_version(example "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(SX70Mk2 0)
-pico_enable_stdio_usb(SX70Mk2 1)
-
-# 启用双击复位进入 BOOTSEL 模式
-target_compile_definitions(SX70Mk2 PRIVATE
-    PICO_BOOTSEL_VIA_GPIO=1
-    PICO_STDIO_USB_CONNECT_GPIO=USB_DP
-)
+pico_enable_stdio_uart(example 0)
+pico_enable_stdio_usb(example 0)
 
 # Add the standard library to the build
-target_link_libraries(SX70Mk2
+target_link_libraries(example
         pico_stdlib
-        pico_bootsel_via_double_reset
-        hardware_i2c
         hardware_gpio
-)
+        hardware_i2c
+        )
 
 # Add the standard include files to the build
-target_include_directories(SX70Mk2 PRIVATE
+target_include_directories(example PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
-        ${CMAKE_CURRENT_LIST_DIR}/src
-        ${CMAKE_CURRENT_LIST_DIR}/src/drivers
 )
 
-# Add driver source files
-target_sources(SX70Mk2 PRIVATE
-        src/drivers/pcf8575.c
-        src/drivers/led.c
-        src/drivers/ssd1306.c
-)
-
-pico_add_extra_outputs(SX70Mk2)
+pico_add_extra_outputs(example)
 

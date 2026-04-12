@@ -37,9 +37,16 @@
 #define PCF8575_I2C_ADDR    0x20        // I2C 地址 (32 十进制)
 
 // PCF8575 引脚定义 (16 位 GPIO)
-#define PCF_P0              0           // 编码器 A 相 (未使用)
-#define PCF_P1              1           // 编码器 B 相 (未使用)
-#define PCF_P2              2           // Button3D 按键
+// 注意：Python PCF8575 库使用 0-7 和 10-17 编号，C 代码使用标准 0-15 bit 位置
+// 转换关系：Python 10-17 → C 8-15 (减 2)
+// 3D 按键：连接在 P12, P10, P11 (Python 编号) → bit 10, 8, 9 (C 编号)
+#define PCF_BUTTON3D_DOWN   10          // 3D 按键 - 下 (Python P12 → C bit 10)
+#define PCF_BUTTON3D_UP     8           // 3D 按键 - 上 (Python P10 → C bit 8)
+#define PCF_BUTTON3D_PUSH   9           // 3D 按键 - 按下 (Python P11 → C bit 9)
+
+// 编码器（预留）
+#define PCF_ENC_A           4           // 主编码器 A 相
+#define PCF_ENC_B           5           // 主编码器 B 相
 #define PCF_P3              3
 #define PCF_P4              4
 #define PCF_P5              5

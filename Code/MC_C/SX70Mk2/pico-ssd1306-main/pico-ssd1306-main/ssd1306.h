@@ -6,7 +6,8 @@
 
 #include <pico/stdlib.h>
 #include <hardware/i2c.h>
-#include "font.h"
+#include "lib/font.h"
+#include "lib/image.h"
 
 #ifndef SSD1306_H
 #define SSD1306_H
@@ -70,6 +71,9 @@ void ssd1306_clear_rect(ssd1306_t *dev, int16_t x, int16_t y, uint16_t width, ui
 
 // Render a null-terminated string using the supplied bitmap font
 void ssd1306_draw_str(ssd1306_t *display, int x, int y, const char *text, const ssd1306_font_t *font);
+
+// Copy a monochrome bitmap into the frame buffer
+void ssd1306_draw_image(ssd1306_t *dev, uint16_t x, uint16_t y, const ssd1306_image_t *image);
 
 // Start horizontal scroll effect across a page range
 void ssd1306_scroll_horiz(ssd1306_t *dev, bool right, uint8_t start_page, uint8_t end_page, uint8_t speed);
