@@ -4,13 +4,18 @@
 // ==================== SX-70 Mk2 引脚定义 ====================
 
 // I2C 端口定义
-#define I2C_PORT_LM         i2c0        // 测光表 I2C
+#define I2C_PORT_LM         i2c0        // 测光表 I2C (TSL2561)
 #define I2C_PIN_LM_SDA      20
 #define I2C_PIN_LM_SCL      21
 
-#define I2C_PORT_PLUG       i2c1        // 外接控制器 I2C (PCF8575)
+#define I2C_PORT_PLUG       i2c1        // 外接控制器 I2C (PCF8575 + OLED)
 #define I2C_PIN_PLUG_SDA    18
 #define I2C_PIN_PLUG_SCL    19
+
+// TSL2561 测光传感器
+#define TSL2561_I2C_PORT    I2C_PORT_LM
+// I2C 地址在 tsl2561.h 中定义为 0x39，但 Python 代码使用 41 (0x29)
+// 实际使用时请以 tsl2561_init() 传入的地址为准
 
 // 直接连接的按键引脚 (Pico GPIO)
 #define S1F_PIN             2           // Sw 1 Focus (半按对焦)
