@@ -14,33 +14,35 @@ extern tsl2561_t lm;
 const char *shutter_speeds[] = {
     "1s", "1/2", "1/3", "1/4", "1/6", "1/8", "1/10", "1/15", "1/20",
     "1/30", "1/45", "1/60", "1/90", "1/125", "1/180", "1/250", "1/360",
-    "1/500", "1/1000", "1/2000"
+    "1/500", "1/1000", "1/2000A", "1/2000B", "1/2000C"
 };
-#define SHUTTER_SPEED_COUNT 20
+#define SHUTTER_SPEED_COUNT 22
 
-// 快门速度时间定义 (ms) - 来自 Python camera_driver.py 1.2.4 版本
-// 用于高精度快门定时器
-const uint16_t shutter_times_ms[] = {
-    1050,  // ev6  = 1s
-    540,   // ev7  = 1/2
-    470,   // ev75 = 1/3
-    300,   // ev8  = 1/4
-    290,   // ev85 = 1/6
-    175,   // ev9  = 1/8
-    136,   // ev95 = 1/10
-    97,    // ev10 = 1/15
-    79,    // ev105= 1/20
-    60,    // ev11 = 1/30
-    52,    // ev115= 1/45
-    45,    // ev12 = 1/60
-    41,    // ev125= 1/90
-    37,    // ev13 = 1/125
-    34,    // ev135= 1/180
-    32,    // ev14 = 1/250
-    28,    // ev145= 1/360
-    25,    // ev15 = 1/500
-    23,    // ev16 = 1/1000
-    22     // ev17 = 1/2000
+// 快门速度时间定义 (0.1ms) - 来自 Python camera_driver.py 1.2.4 版本
+// 用于高精度快门定时器，原 ms 值×10
+const uint16_t shutter_times_x10[] = {
+    10500,  // ev6  = 1s      = 1050.0ms
+    5400,   // ev7  = 1/2     = 540.0ms
+    4700,   // ev75 = 1/3     = 470.0ms
+    3000,   // ev8  = 1/4     = 300.0ms
+    2900,   // ev85 = 1/6     = 290.0ms
+    1750,   // ev9  = 1/8     = 175.0ms
+    1360,   // ev95 = 1/10    = 136.0ms
+    970,    // ev10 = 1/15    = 97.0ms
+    790,    // ev105= 1/20    = 79.0ms
+    600,    // ev11 = 1/30    = 60.0ms
+    520,    // ev115= 1/45    = 52.0ms
+    450,    // ev12 = 1/60    = 45.0ms
+    410,    // ev125= 1/90    = 41.0ms
+    370,    // ev13 = 1/125   = 37.0ms
+    340,    // ev135= 1/180   = 34.0ms
+    320,    // ev14 = 1/250   = 32.0ms
+    280,    // ev145= 1/360   = 28.0ms
+    250,    // ev15 = 1/500   = 25.0ms
+    230,    // ev16 = 1/1000  = 23.0ms
+    225,     // ev17A = 1/2000  = 22.0ms
+    220,     // ev17B = 1/2000  = 22.0ms
+    215     // ev17C = 1/2000  = 22.0ms
 };
 
 uint8_t calc_shutter_from_lux(float lux) {
@@ -75,12 +77,12 @@ const char* get_shutter_speed(uint8_t index) {
     return shutter_speeds[index];
 }
 
-// 获取快门速度时间 (ms)
-uint16_t get_shutter_time_ms(uint8_t index) {
+// 获取快门速度时间 (0.1ms)
+uint16_t get_shutter_time_x10(uint8_t index) {
     if (index >= SHUTTER_SPEED_COUNT) {
-        return shutter_times_ms[SHUTTER_SPEED_COUNT - 1];
+        return shutter_times_x10[SHUTTER_SPEED_COUNT - 1];
     }
-    return shutter_times_ms[index];
+    return shutter_times_x10[index];
 }
 
 float do_meter(float *last_lux, uint8_t *auto_shutter_pos) {

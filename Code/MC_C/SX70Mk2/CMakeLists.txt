@@ -56,6 +56,7 @@ target_link_libraries(SX70Mk2
         pico_bootsel_via_double_reset
         hardware_i2c
         hardware_gpio
+        hardware_pwm
         m
 )
 
@@ -74,6 +75,7 @@ target_sources(SX70Mk2 PRIVATE
         src/drivers/ssd1306.c
         src/drivers/tsl2561.c
         camera/metering.c
+        camera/shutter.c
 )
 
 pico_add_extra_outputs(SX70Mk2)

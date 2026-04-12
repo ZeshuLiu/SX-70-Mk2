@@ -12,6 +12,7 @@
 #include "drivers/tsl2561.h"
 #include "pins.h"
 #include "metering.h"
+#include "shutter.h"
 
 // 设备实例
 static pcf8575_t pcf;
@@ -23,7 +24,7 @@ typedef struct {
     uint8_t menu;           // 菜单层级：0=AUTO, 1=BULB, 2=TIME, 3=MANUAL, 10=自拍
     uint8_t m_pos;          // M 档快门速度索引
     uint8_t self_timer_ind; // 自拍定时索引
-    char cam_mode[6];       // 当前模式字符串
+    char cam_mode[8];       // 当前模式字符串 (最长 "1/2000" + \0 = 7 字节)
     float last_lux;         // 上次测光值 (浮点数)
     uint8_t auto_shutter_pos; // AUTO 档计算的快门位置
     char shut_mode;         // 快门模式：'0'=闪光，'1'=正常，'B'=B 门，'T'=T 门
@@ -50,6 +51,10 @@ static const uint8_t timer_list[] = {0, 3, 5, 10};
 
 // S1F 半按快门对焦检测
 static uint8_t s1f_last = 1;  // 上次 S1F 状态 (1=未按下，0=按下)
+
+// 闪光灯检测状态 (对应 Python flash_connected)
+// S2 引脚：PULL_UP，闪光灯连接时接地 (0)，无闪光灯时上拉 (1)
+static uint8_t flash_connected = 0;
 
 void enter_bootloader() {
     reset_usb_boot(0, 0);
@@ -89,8 +94,28 @@ void do_focus(char *shut_mode, uint8_t *shutter_speed) {
     // 设置 S1F 反馈引脚为高电平 (对应 Python S1F_FBW.value(1))
     gpio_put(S1F_FBW_PIN, 1);
 
-    // 根据当前菜单模式决定对焦行为
-    if (g_state.menu == 0) {
+    // 根据闪光灯状态和对焦模式决定行为
+    if (flash_connected) {
+        // 有闪光灯：闪光灯模式 (对应 Python Focus_Flash_work)
+        *shut_mode = '0';  // 闪光模式
+
+        // A 档或 M 档：根据情况限制快门速度
+        if (g_state.menu == 0) {
+            // A 档：固定 ev11
+            *shutter_speed = 11;
+        } else if (g_state.menu == 3) {
+            // M 档：如果比 ev11 快（索引>11），则限制为 ev11；否则保持用户设置
+            if (g_state.m_pos > 11) {
+                *shutter_speed = 11;
+            } else {
+                *shutter_speed = g_state.m_pos;
+            }
+        } else {
+            // B/T 档等其他模式
+            *shutter_speed = 11;
+        }
+        printf("Flash connected! shutter=%s\r\n", get_shutter_speed(*shutter_speed));
+    } else if (g_state.menu == 0) {
         // A 档 (Auto) - 自动测光决定快门速度
         *shut_mode = '1';  // 正常模式
         do_meter(&g_state.last_lux, &g_state.auto_shutter_pos);
@@ -231,9 +256,23 @@ void show_frame() {
     // ISO 显示
     ssd1306_draw_str(&oled, 55, 2, "600", &font5x8_font);
 
+    // 闪光灯指示 (对应 Python: self.display.text('FLASH', 86, 2, 0))
+    if (flash_connected) {
+        ssd1306_draw_str(&oled, 86, 2, "FLASH", &font5x8_font);
+    } else {
+        ssd1306_draw_str(&oled, 90, 2, "OFF", &font5x8_font);
+    }
+
     // 快门速度大字 (AUTO 档显示计算的快门，M 档显示手动设置的)
     uint8_t shutter_index = (g_state.menu == 0) ? g_state.auto_shutter_pos : g_state.m_pos;
-    ssd1306_draw_str(&oled, 8, 18, get_shutter_speed(shutter_index), &font5x8_font);
+    // 根据快门速度字符串长度调整 x 坐标，确保短速度值 (如 1/2000) 居中显示
+    int shutter_x = 8;
+    if (shutter_index >= 17) {  // 1/500 及更快
+        shutter_x = 4;
+    } else if (shutter_index >= 14) {  // 1/250 ~ 1/360
+        shutter_x = 6;
+    }
+    ssd1306_draw_str(&oled, shutter_x, 18, get_shutter_speed(shutter_index), &font5x8_font);
 
     // 显示 LUX 值 (右下角)
     char lux_str[16];
@@ -293,17 +332,41 @@ int main() {
 
     printf("\r\n=== SX-70 Mk2 启动 ===\r\n");
 
-    // 初始化引脚
+    // 初始化输入引脚
     gpio_init(S1F_PIN);
     gpio_set_dir(S1F_PIN, GPIO_IN);
-    gpio_pull_up(S1F_PIN);
+
+    gpio_init(S1T_PIN);
+    gpio_set_dir(S1T_PIN, GPIO_IN);
+
+    gpio_init(S2_PIN);
+    gpio_set_dir(S2_PIN, GPIO_IN);
+    gpio_pull_up(S2_PIN);  // 闪光灯检测：连接时接地 (0)，无闪光灯时上拉 (1)
+
+    gpio_init(S3_PIN);
+    gpio_set_dir(S3_PIN, GPIO_IN);
+    gpio_pull_up(S3_PIN);
+
+    gpio_init(S5_PIN);
+    gpio_set_dir(S5_PIN, GPIO_IN);
+    gpio_pull_up(S5_PIN);
+
+    // 初始化输出引脚
+    gpio_init(MOTOR_PIN);
+    gpio_set_dir(MOTOR_PIN, GPIO_OUT);
+    gpio_put(MOTOR_PIN, 0);
+
+    gpio_init(FF_PIN);
+    gpio_set_dir(FF_PIN, GPIO_OUT);
+    gpio_put(FF_PIN, 0);
 
     // S1F 反馈引脚 (对应 Python S1F_FBW)
     gpio_init(S1F_FBW_PIN);
     gpio_set_dir(S1F_FBW_PIN, GPIO_OUT);
     gpio_put(S1F_FBW_PIN, 0);  // 初始为低电平
 
-    // 初始化
+    // 初始化驱动
+    shutter_init();  // 快门 PWM 初始化
     led_init();
     pcf8575_init_system();
     oled_init_system();
@@ -332,11 +395,16 @@ int main() {
     while (true) {
         button3d_handler();
 
-        // 读取 S1F (半按快门) 状态
+        // 检测闪光灯连接状态 (对应 Python: self.flash_connected = not self.s2.value())
+        // S2 上拉：无闪光灯=1，有闪光灯 (接地)=0
+        flash_connected = !gpio_get(S2_PIN);
+
+        // 读取 S1F (半按快门) 和 S1T (全按快门) 状态
         uint8_t s1f = gpio_get(S1F_PIN);
+        uint8_t s1t = gpio_get(S1T_PIN);
 
         // 半按快门对焦 (对应 Python: if foc == self.Red_Button_Pressed and self.if_focused == False)
-        if (s1f == 0 && if_focused == 0) {
+        if (s1f == 1 && if_focused == 0) {
             if (g_state.menu == 10) {
                 printf("不在拍摄模式\r\n");
             } else {
@@ -345,13 +413,36 @@ int main() {
         }
 
         // 松开半按快门 (对应 Python: if foc != self.Red_Button_Pressed and self.if_focused == True)
-        if (s1f != 0 && if_focused == 1) {
+        if (s1f != 1 && if_focused == 1) {
             do_focus_release();
         }
 
         // AUTO 模式 并且 处于对焦状态下 进行测光
-        if (g_state.menu == 0 && if_focused == 0) {
+        if (g_state.menu == 0 && if_focused == 1) {
             do_meter(&g_state.last_lux, &g_state.auto_shutter_pos);
+        }
+
+        // 全按快门拍摄 (对应 Python: if tak == self.Red_Button_Pressed)
+        if (s1t == 1) {
+            if (g_state.menu == 10) {
+                printf("不在拍摄模式\r\n");
+            } else {
+                // 确保已对焦
+                if (if_focused == 0) {
+                    do_focus(&g_state.shut_mode, &g_state.shutter_speed);
+                }
+
+                // 获取快门时间 (0.1ms)
+                uint16_t shutter_delay = get_shutter_time_x10(g_state.shutter_speed);
+
+                // 执行曝光控制
+                shutter_expose(shutter_delay, g_state.shut_mode);
+            }
+
+            // 等待全按快门释放，防止连拍
+            while (gpio_get(S1T_PIN) == 1) {
+                sleep_ms(10);
+            }
         }
 
         show_frame();
