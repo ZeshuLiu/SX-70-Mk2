@@ -3,6 +3,7 @@
 #include <math.h>
 #include "pico/stdlib.h"
 #include "pico/bootrom.h"
+#include "hardware/clocks.h"
 #include "hardware/i2c.h"
 #include "drivers/pcf8575.h"
 #include "drivers/ssd1306.h"
@@ -18,6 +19,8 @@
 static pcf8575_t pcf;
 static ssd1306_t oled;
 tsl2561_t lm;  // 测光表 (暴露给 metering.c)
+uint8_t s1f = 0;
+uint8_t s1t = 0;
 
 // 相机状态 - 对应 Python Button3D 类
 typedef struct {
@@ -69,6 +72,25 @@ void read_3d_button_pins(char *result) {
     result[1] = ((state >> PCF_BUTTON3D_UP) & 1) ? '1' : '0';
     result[2] = ((state >> PCF_BUTTON3D_PUSH) & 1) ? '1' : '0';
     result[3] = '\0';
+}
+
+void debounce_read_s1pin(void){
+    bool s1f_t = gpio_get(S1F_PIN);
+    bool s1t_t = gpio_get(S1T_PIN);
+
+    if (s1f_t == 0){
+        s1f = (s1f == 0)? s1f:s1f-1;
+    }
+    else{
+        s1f = S1_DEBOUNCE_COUNT;
+    }
+
+    if (s1t_t == 0){
+        s1t = (s1t == 0)? s1t:s1t-1;
+    }
+    else{
+        s1t = S1_DEBOUNCE_COUNT;
+    }
 }
 
 // 更新相机模式显示
@@ -331,6 +353,7 @@ int main() {
     sleep_ms(300);
 
     printf("\r\n=== SX-70 Mk2 启动 ===\r\n");
+    printf("clk_sys = %lu Hz\n", clock_get_hz(clk_sys));
 
     // 初始化输入引脚
     gpio_init(S1F_PIN);
@@ -400,11 +423,12 @@ int main() {
         flash_connected = !gpio_get(S2_PIN);
 
         // 读取 S1F (半按快门) 和 S1T (全按快门) 状态
-        uint8_t s1f = gpio_get(S1F_PIN);
-        uint8_t s1t = gpio_get(S1T_PIN);
+        debounce_read_s1pin();
+        bool s1f_pressed = (s1f > 0);
+        bool s1t_pressed = (s1t > 0);
 
         // 半按快门对焦 (对应 Python: if foc == self.Red_Button_Pressed and self.if_focused == False)
-        if (s1f == 1 && if_focused == 0) {
+        if (s1f_pressed == 1 && if_focused == 0) {
             if (g_state.menu == 10) {
                 printf("不在拍摄模式\r\n");
             } else {
@@ -413,7 +437,7 @@ int main() {
         }
 
         // 松开半按快门 (对应 Python: if foc != self.Red_Button_Pressed and self.if_focused == True)
-        if (s1f != 1 && if_focused == 1) {
+        if (s1f_pressed != 1 && if_focused == 1) {
             do_focus_release();
         }
 
@@ -423,7 +447,7 @@ int main() {
         }
 
         // 全按快门拍摄 (对应 Python: if tak == self.Red_Button_Pressed)
-        if (s1t == 1) {
+        if (s1t_pressed == 1) {
             // gpio_put(LED_Y_PIN, 0);  // 强制高电平
             // gpio_put(LED_B_PIN, 1);
             led_close();
@@ -454,12 +478,12 @@ int main() {
         read_3d_button_pins(btn);
         if (g_state.menu == 0) {
             printf("S1F=%d Focused=%d | Menu=%d Mode=%s | LUX=%.2f Shutter=%s\r\n",
-                    s1f, if_focused, g_state.menu, g_state.cam_mode,
+                    s1f_pressed, if_focused, g_state.menu, g_state.cam_mode,
                     g_state.last_lux, get_shutter_speed(g_state.auto_shutter_pos));
         } else {
             printf("S1F=%d Focused=%d | Menu=%d Mode=%s\r\n",
-                    s1f, if_focused, g_state.menu, g_state.cam_mode);
+                    s1f_pressed, if_focused, g_state.menu, g_state.cam_mode);
         }
-        sleep_ms(100);
+        // sleep_ms(10);
     }
 }

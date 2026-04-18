@@ -18,6 +18,7 @@
 // 实际使用时请以 tsl2561_init() 传入的地址为准
 
 // 直接连接的按键引脚 (Pico GPIO)
+#define S1_DEBOUNCE_COUNT   1
 #define S1F_PIN             2           // Sw 1 Focus (半按对焦)
 #define S1T_PIN             1           // Sw 1 Take Photo (全按拍摄)
 #define S2_PIN              14          // Flash Check (闪光检测)
