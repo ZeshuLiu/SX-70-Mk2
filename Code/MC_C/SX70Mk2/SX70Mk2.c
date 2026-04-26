@@ -137,7 +137,7 @@ void do_focus(char *shut_mode, uint8_t *shutter_speed) {
             // B/T 档等其他模式
             *shutter_speed = 11;
         }
-        printf("Flash connected! shutter=%s\r\n", get_shutter_speed(*shutter_speed));
+        DEBUG_PRINTF("Flash connected! shutter=%s\r\n", get_shutter_speed(*shutter_speed));
     } else if (g_state.menu == 0) {
         // A 档 (Auto) - 自动测光决定快门速度
         *shut_mode = '1';  // 正常模式
@@ -163,7 +163,7 @@ void do_focus(char *shut_mode, uint8_t *shutter_speed) {
         *shutter_speed = 1;
     }
 
-    printf("Focus: mode=%c, shutter=%s\r\n", *shut_mode, get_shutter_speed(*shutter_speed));
+    DEBUG_PRINTF("Focus: mode=%c, shutter=%s\r\n", *shut_mode, get_shutter_speed(*shutter_speed));
 }
 
 // 松开对焦 (对应 Python 中松开 S1F 的处理)
@@ -171,7 +171,7 @@ void do_focus_release() {
     if_focused = 0;
     // 设置 S1F 反馈引脚为低电平 (对应 Python S1F_FBW.value(0))
     gpio_put(S1F_FBW_PIN, 0);
-    printf("Focus Release\r\n");
+    DEBUG_PRINTF("Focus Release\r\n");
 }
 
 // 下键按下回调
@@ -318,7 +318,7 @@ void pcf8575_init_system() {
     gpio_pull_up(I2C_PIN_PLUG_SCL);
 
     int ret = pcf8575_init(&pcf, I2C_PORT_PLUG, PCF8575_I2C_ADDR, 0xFFFF);
-    printf("PCF8575 @ 0x20: %s\r\n", ret == 0 ? "OK" : "FAIL");
+    DEBUG_PRINTF("PCF8575 @ 0x20: %s\r\n", ret == 0 ? "OK" : "FAIL");
 }
 
 // 初始化 OLED (128x32)
@@ -330,7 +330,7 @@ void oled_init_system() {
     gpio_pull_up(I2C_PIN_PLUG_SCL);
 
     bool ret = ssd1306_init(&oled, 128, 32, 0x3C, I2C_PORT_PLUG, false);
-    printf("OLED @ 0x3C: %s\r\n", ret ? "OK" : "FAIL");
+    DEBUG_PRINTF("OLED @ 0x3C: %s\r\n", ret ? "OK" : "FAIL");
 }
 
 // 初始化 TSL2561 测光表 (I2C0)
@@ -342,44 +342,64 @@ void tsl2561_init_system() {
     gpio_pull_up(I2C_PIN_LM_SCL);
 
     int ret = tsl2561_init(&lm, I2C_PORT_LM, TSL2561_I2C_ADDR);
-    printf("TSL2561 @ 0x29: %s\r\n", ret == 0 ? "OK" : "FAIL");
+    DEBUG_PRINTF("TSL2561 @ 0x29: %s\r\n", ret == 0 ? "OK" : "FAIL");
     if (ret == 0) {
         uint8_t id = tsl2561_read_id(&lm);
-        printf("TSL2561 ID: 0x%02X\r\n", id);
+        DEBUG_PRINTF("TSL2561 ID: 0x%02X\r\n", id);
     }
 }
 
-void check_body_parts() {
+// 机身检测故障掩码 (32 位，每 bit 对应一个故障)
+#define BODY_FAULT_REFLECTOR_POS        (1u << 0)   // 反光板位置不正确
+// #define BODY_FAULT_S3_REFLECTOR_UP   (1u << 1)   // 反光板位置异常
+
+static uint32_t g_faults = 0;
+static uint32_t g_faults_mask = 0xffffffff;
+
+void show_fault() {
+//todo 逐位显示
+    if((g_faults & g_faults_mask) == 0) return;
+
     char btn[4];
-    uint8_t s3_state = gpio_get(S3_PIN);
-    // uint8_t s5_state = gpio_get(S5_PIN);
-    DEBUG_PRINTF("S3=%d\r\n", s3_state);
+    ssd1306_clear(&oled);
+    ssd1306_draw_str(&oled, 10, 8, "ERROR 01", &font5x8_font);
+    ssd1306_draw_str(&oled, 5, 20, "See Manual", &font5x8_font);
+    ssd1306_show(&oled);
+    DEBUG_PRINTF("[WARN] 故障: mask=0x%08uX\r\n", (g_faults & g_faults_mask));
 
-    if (s3_state == 0) {
-        ssd1306_clear(&oled);
-        ssd1306_draw_str(&oled, 10, 8, "ERROR 01", &font5x8_font);
-        ssd1306_draw_str(&oled, 5, 20, "See Manual", &font5x8_font);
-        ssd1306_show(&oled);
-        DEBUG_PRINTF("[WARN] S3 条件满足 (S3!=0)\r\n");
-
-        // 阻塞直到 button3d 任意按钮按下
-        while (1) {
-            read_3d_button_pins(btn);
-            if (btn[0] == '0' || btn[1] == '0' || btn[2] == '0') {
-                break;
-            }
-            sleep_ms(50);
+    // 阻塞直到 button3d 任意按钮按下
+    while (1) {
+        read_3d_button_pins(btn);
+        if (btn[0] == '0' || btn[1] == '0' || btn[2] == '0') {
+            g_faults_mask = g_faults_mask & (~g_faults);
+            break;
         }
-        sleep_ms(200); // 释放去抖
+        sleep_ms(50);
     }
+    sleep_ms(200); // 释放去抖
+}
+
+void check_body_parts() {
+    g_faults = 0;
+
+    if (gpio_get(S5_PIN) != 0) {
+        g_faults |= BODY_FAULT_REFLECTOR_POS;
+    }
+    // if (gpio_get(S5_PIN) == 1) {
+    //     g_faults |= BODY_FAULT_S5_FILM;
+    // }
+
+    // if (g_body_faults) {
+    //     show_fault(g_faults);
+    // }
 }
 
 int main() {
     stdio_init_all();
     sleep_ms(300);
 
-    printf("\r\n=== SX-70 Mk2 启动 ===\r\n");
-    printf("clk_sys = %u Hz\n", clock_get_hz(clk_sys));
+    DEBUG_PRINTF("\r\n=== SX-70 Mk2 启动 ===\r\n");
+    DEBUG_PRINTF("clk_sys = %u Hz\n", clock_get_hz(clk_sys));
 
     // 初始化输入引脚
     gpio_init(S1F_PIN);
@@ -442,6 +462,7 @@ int main() {
 
     // 检查 S3 和 S5 开关状态
     check_body_parts();
+    show_fault();
 
 // 主循环 (对应 Python Cam_Operation)
     while (true) {
@@ -459,7 +480,7 @@ int main() {
         // 半按快门对焦 (对应 Python: if foc == self.Red_Button_Pressed and self.if_focused == False)
         if (s1f_pressed == 1 && if_focused == 0) {
             if (g_state.menu == 10) {
-                printf("不在拍摄模式\r\n");
+                DEBUG_PRINTF("不在拍摄模式\r\n");
             } else {
                 do_focus(&g_state.shut_mode, &g_state.shutter_speed);
             }
@@ -481,7 +502,7 @@ int main() {
             // gpio_put(LED_B_PIN, 1);
             led_close();
             if (g_state.menu == 10) {
-                printf("不在拍摄模式\r\n");
+                DEBUG_PRINTF("不在拍摄模式\r\n");
             } else {
                 // 确保已对焦
                 if (if_focused == 0) {
@@ -506,13 +527,17 @@ int main() {
         // 打印按键状态和测光数据
         read_3d_button_pins(btn);
         if (g_state.menu == 0) {
-            printf("S1F=%d Focused=%d | Menu=%d Mode=%s | LUX=%.2f Shutter=%s\r\n",
+            DEBUG_PRINTF("S1F=%d Focused=%d | Menu=%d Mode=%s | LUX=%.2f Shutter=%s\r\n",
                     s1f_pressed, if_focused, g_state.menu, g_state.cam_mode,
                     g_state.last_lux, get_shutter_speed(g_state.auto_shutter_pos));
         } else {
-            printf("S1F=%d Focused=%d | Menu=%d Mode=%s\r\n",
+            DEBUG_PRINTF("S1F=%d Focused=%d | Menu=%d Mode=%s\r\n",
                     s1f_pressed, if_focused, g_state.menu, g_state.cam_mode);
         }
+
+        // 检查 S3 和 S5 开关状态
+        check_body_parts();
+        show_fault();
         // sleep_ms(10);
     }
 }
