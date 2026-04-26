@@ -353,7 +353,7 @@ int main() {
     sleep_ms(300);
 
     printf("\r\n=== SX-70 Mk2 启动 ===\r\n");
-    printf("clk_sys = %lu Hz\n", clock_get_hz(clk_sys));
+    printf("clk_sys = %u Hz\n", clock_get_hz(clk_sys));
 
     // 初始化输入引脚
     gpio_init(S1F_PIN);

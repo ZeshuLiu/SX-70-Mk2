@@ -1,8 +1,8 @@
 {
   "board": {
     "active_layer": 0,
-    "active_layer_preset": "没有锁定阴影",
-    "auto_track_width": false,
+    "active_layer_preset": "",
+    "auto_track_width": true,
     "hidden_netclasses": [],
     "hidden_nets": [],
     "high_contrast_mode": 0,
@@ -20,7 +20,7 @@
       "footprints": true,
       "graphics": true,
       "keepouts": true,
-      "lockedItems": true,
+      "lockedItems": false,
       "otherItems": true,
       "pads": true,
       "text": true,
@@ -45,19 +45,20 @@
       "pads",
       "zones",
       "drc_warnings",
-      "conflict_shadows"
+      "locked_item_shadows",
+      "conflict_shadows",
+      "shapes"
     ],
-    "visible_layers": "00000000_00000000_55ffffff_ffffffff",
+    "visible_layers": "ffffffff_ffffffff_ffffffff_ffffffff",
     "zone_display_mode": 0
   },
   "git": {
-    "repo_password": "",
     "repo_type": "",
     "repo_username": "",
     "ssh_key": ""
   },
   "meta": {
-    "filename": "opsx_x.kicad_prl",
+    "filename": "sx70M2.kicad_prl",
     "version": 5
   },
   "net_inspector_panel": {
@@ -86,16 +87,16 @@
       9
     ],
     "col_widths": [
-      282,
-      267,
-      162,
-      99,
-      162,
-      162,
-      162,
-      99,
-      162,
-      162
+      174,
+      159,
+      100,
+      63,
+      100,
+      100,
+      100,
+      63,
+      100,
+      100
     ],
     "custom_group_rules": [],
     "expanded_rows": [],

@@ -81,7 +81,7 @@ void shutter_open(void) {
 
 void shutter_keep_closed(void) {
     // 保持快门关闭 (对应 Python duty_u16(30000))
-    pwm_set_chan_level(shutter_pwm_slice, shutter_channel_num, 1000);
+    pwm_set_chan_level(shutter_pwm_slice, shutter_channel_num, 400);
 }
 
 void aperture_engage(void) {
