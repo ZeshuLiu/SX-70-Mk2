@@ -7,10 +7,23 @@
 #define SHUTTER_H
 
 #include <stdint.h>
+#include <stdbool.h>
+
+#define GPIO_DEBOUNCE_COUNT 5
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**
+ * @brief 去抖读取 GPIO，需连续 5 次高电平才判定为真
+ */
+bool gpio_debounce_defaultHigh(int pin);
+
+/**
+ * @brief 去抖读取 GPIO，默认低电平，需连续 5 次高电平才判定为 true
+ */
+bool gpio_debounce_defaultLow(int pin);
 
 // 快门模式
 #define SHUTTER_NORMAL      '1'     // 普通曝光模式

@@ -7,9 +7,11 @@
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
 #include "hardware/clocks.h"
+#include "hardware/gpio.h"
 #include "hardware/timer.h"
 #include "pins.h"
 #include <stdio.h>
+#include "CONF.h"
 
 // 快门 PWM 切片号
 static uint shutter_pwm_slice, shutter_channel_num;
@@ -94,46 +96,72 @@ void aperture_disengage(void) {
     pwm_set_chan_level(aperture_pwm_slice, aperture_channel_num, 0);
 }
 
+/**
+ * @brief 去抖读取 GPIO，需连续 GPIO_DEBOUNCE_COUNT 次低电平才判定为 false
+ *
+ * 用于 while 循环中等待引脚从高变低，防止单次低电平毛刺导致误触发
+ */
+bool gpio_debounce_defaultHigh(int pin) {
+    for (int i = 0; i < GPIO_DEBOUNCE_COUNT; i++) {
+        if (gpio_get(pin)) return true;  // 任何一次高电平 → 仍然按下
+        sleep_us(7);
+    }
+    return false;  // 连续 GPIO_DEBOUNCE_COUNT 次低电平 → 真正释放
+}
+
+/**
+ * @brief 去抖读取 GPIO，默认低电平，需连续 GPIO_DEBOUNCE_COUNT 次高电平才判定为 true
+ *
+ * 用于 while 循环中等待引脚从低变高，防止单次高电平毛刺导致误触发
+ */
+bool gpio_debounce_defaultLow(int pin) {
+    for (int i = 0; i < GPIO_DEBOUNCE_COUNT; i++) {
+        if (!gpio_get(pin)) return false;  // 任何一次低电平 → 仍未按下
+        sleep_us(7);
+    }
+    return true;  // 连续 GPIO_DEBOUNCE_COUNT 次高电平 → 真正按下
+}
+
 void shutter_expose(uint16_t shutter_delay_x10, char mode) {
     // 拍摄前准备
-    printf("Taking Picture\r\n");
-    printf("Shutter start to close!\r\n");
+    DEBUG_PRINTF("Taking Picture\r\n");
+    DEBUG_PRINTF("Shutter start to close!\r\n");
 
     // 关闭快门
     shutter_close();
     sleep_ms(30);
     shutter_keep_closed();
 
-    printf("Shutter closed!\r\n");
+    DEBUG_PRINTF("Shutter closed!\r\n");
     sleep_ms(30);  // 等快门完全关闭
 
     // 电机启动，带动反光板上升
     gpio_put(MOTOR_PIN, 1);
-    printf("Motor Start Moving\r\n");
+    DEBUG_PRINTF("Motor Start Moving\r\n");
 
     // 等待反光板就位 (S3 引脚检测)
-    while (gpio_get(S3_PIN) == 0) {
-        tight_loop_contents();
+    while (gpio_debounce_defaultLow(S3_PIN) == 0) {
+        sleep_us(100);
     }
 
     gpio_put(MOTOR_PIN, 0);
-    printf("Motor Stoped!\r\n");
+    DEBUG_PRINTF("Motor Stoped!\r\n");
 
     // Y Delay (光圈就位 + 自拍延时)
     if (mode == SHUTTER_FLASH) {
         // 闪光模式：光圈就位
         aperture_engage();
-        printf("Aperture engaged (Flash mode)\r\n");
+        DEBUG_PRINTF("Aperture engaged (Flash mode)\r\n");
     }
     sleep_ms(18);  // 基础 Y delay
 
     // 开启快门，曝光开始
-    printf("Shutter Start to Open, Exposure Starts\r\n");
+    DEBUG_PRINTF("Shutter Start to Open, Exposure Starts\r\n");
 
     if (mode == SHUTTER_NORMAL) {
         // 普通曝光模式 - 使用硬件定时器
         // shutter_delay_x10 单位是 0.1ms，转换成 us 需要×100
-        printf("Normal Mode! delay=%d (0.1ms)\r\n", shutter_delay_x10);
+        DEBUG_PRINTF("Normal Mode! delay=%d (0.1ms)\r\n", shutter_delay_x10);
 
         shutter_timer_fired = false;
         shutter_open();
@@ -151,7 +179,7 @@ void shutter_expose(uint16_t shutter_delay_x10, char mode) {
 
     } else if (mode == SHUTTER_FLASH) {
         // 闪光灯模式 (暂未完全实现)
-        printf("Flash Mode!\r\n");
+        DEBUG_PRINTF("Flash Mode!\r\n");
 
         // shutter_delay_x10 单位是 0.1ms，47ms = 470
         int gap = (int)shutter_delay_x10 - 470;
@@ -170,55 +198,55 @@ void shutter_expose(uint16_t shutter_delay_x10, char mode) {
 
     } else if (mode == SHUTTER_BULB) {
         // B 门模式
-        printf("B Mode!\r\n");
+        DEBUG_PRINTF("B Mode!\r\n");
         shutter_open();
         sleep_ms(15);
 
         // 等待全按快门释放
-        while (gpio_get(S1T_PIN) == 1) {
+        while (gpio_debounce_defaultHigh(S1T_PIN) == 1) {
             sleep_ms(3);
         }
 
     } else if (mode == SHUTTER_TIME) {
         // T 门模式
-        printf("T Mode!\r\n");
+        DEBUG_PRINTF("T Mode!\r\n");
         shutter_open();
 
         // 等待按钮释放（按下=1，松开=0）
-        while (gpio_get(S1T_PIN) == 1) {
-            tight_loop_contents();
+        while (gpio_debounce_defaultHigh(S1T_PIN) == 1) {
+            sleep_us(100);
         }
 
         // 等待再次按下
-        while (gpio_get(S1T_PIN) == 0) {
+        while (gpio_debounce_defaultLow(S1T_PIN) == 0) {
             sleep_ms(3);
         }
     }
 
     // 关闭快门，曝光结束
     shutter_close();
-    printf("Shutter Closing!\r\n");
+    DEBUG_PRINTF("Shutter Closing!\r\n");
     sleep_ms(30);
     shutter_keep_closed();
-    printf("Shutter Closed. Exposure Finished\r\n");
+    DEBUG_PRINTF("Shutter Closed. Exposure Finished\r\n");
     sleep_ms(18);
 
     // 光圈归位
     if (mode == SHUTTER_FLASH) {
         aperture_disengage();
-        printf("Aperture disengaged\r\n");
+        DEBUG_PRINTF("Aperture disengaged\r\n");
     }
 
     // 电机启动，开始吐片
     gpio_put(MOTOR_PIN, 1);
-    printf("Motor Working for film ejection!\r\n");
+    DEBUG_PRINTF("Motor Working for film ejection!\r\n");
 
     // 等待胶片检测 (S5 引脚)
-    while (gpio_get(S5_PIN) == 1) {
-        tight_loop_contents();
+    while (gpio_debounce_defaultHigh(S5_PIN) == 1) {
+        sleep_us(100);
     }
 
     gpio_put(MOTOR_PIN, 0);
     shutter_open();
-    printf("Film ejection complete!\r\n");
+    DEBUG_PRINTF("Film ejection complete!\r\n");
 }

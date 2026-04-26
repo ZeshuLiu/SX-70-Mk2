@@ -12,6 +12,7 @@
 #include "drivers/led.h"
 #include "drivers/tsl2561.h"
 #include "pins.h"
+#include "CONF.h"
 #include "metering.h"
 #include "shutter.h"
 
@@ -348,6 +349,31 @@ void tsl2561_init_system() {
     }
 }
 
+void check_body_parts() {
+    char btn[4];
+    uint8_t s3_state = gpio_get(S3_PIN);
+    // uint8_t s5_state = gpio_get(S5_PIN);
+    DEBUG_PRINTF("S3=%d\r\n", s3_state);
+
+    if (s3_state == 0) {
+        ssd1306_clear(&oled);
+        ssd1306_draw_str(&oled, 10, 8, "ERROR 01", &font5x8_font);
+        ssd1306_draw_str(&oled, 5, 20, "See Manual", &font5x8_font);
+        ssd1306_show(&oled);
+        DEBUG_PRINTF("[WARN] S3 条件满足 (S3!=0)\r\n");
+
+        // 阻塞直到 button3d 任意按钮按下
+        while (1) {
+            read_3d_button_pins(btn);
+            if (btn[0] == '0' || btn[1] == '0' || btn[2] == '0') {
+                break;
+            }
+            sleep_ms(50);
+        }
+        sleep_ms(200); // 释放去抖
+    }
+}
+
 int main() {
     stdio_init_all();
     sleep_ms(300);
@@ -414,7 +440,10 @@ int main() {
         enter_bootloader();
     }
 
-    // 主循环 (对应 Python Cam_Operation)
+    // 检查 S3 和 S5 开关状态
+    check_body_parts();
+
+// 主循环 (对应 Python Cam_Operation)
     while (true) {
         button3d_handler();
 
@@ -467,7 +496,7 @@ int main() {
             }
 
             // 等待全按快门释放，防止连拍
-            while (gpio_get(S1T_PIN) == 1) {
+            while (gpio_debounce_defaultHigh(S1T_PIN)) {
                 sleep_ms(10);
             }
         }
