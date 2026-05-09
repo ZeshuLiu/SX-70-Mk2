@@ -147,8 +147,17 @@ static esp_err_t post_update_handler(httpd_req_t *req)
                             "Boot partition error");
         return ESP_FAIL;
     }
+    ESP_LOGI(TAG, "Boot partition set to: %s", part->label);
 
-    ESP_LOGI(TAG, "OTA done — %d bytes, restarting...", total);
+    // 验证启动分区确实设对了
+    const esp_partition_t *boot_part = esp_ota_get_boot_partition();
+    if (boot_part) {
+        ESP_LOGI(TAG, "Verified boot partition: %s (0x%" PRIx32 ")",
+                 boot_part->label, boot_part->address);
+    }
+
+    ESP_LOGI(TAG, "OTA done — %d bytes written to %s, restarting...",
+             total, part->label);
     httpd_resp_sendstr(req, "OK — restarting");
     vTaskDelay(pdMS_TO_TICKS(500));
     esp_restart();

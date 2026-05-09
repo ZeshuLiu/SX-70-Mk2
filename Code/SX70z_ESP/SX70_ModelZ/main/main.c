@@ -5,11 +5,17 @@
  *   Core 0: WiFi 协议栈 + NimBLE BLE + 事件处理（射频相关，必须在此核）
  *   Core 1: 相机控制任务（时序敏感，与射频中断隔离）
  *
- * 初始化流程（均在 Core 0 后台运行，不阻塞控制任务）：
- *   1. NVS           — 存储 WiFi 凭据、BLE 配对信息
- *   2. WiFi STA      — 启动 Station 模式
- *   3. BLE Provisioning — 若未配网则广播等待手机 App 发送凭据
- *   4. 启动控制任务    — Core 1，独立运行，不受 WiFi/BLE 状态影响
+ * 初始化流程（均在 Core 0 顺序执行）：
+ *   0. devinfo_init()          — 芯片 MAC → 设备序列号
+ *   1. OTA 回滚检查             — 若分区为 PENDING_VERIFY，立即确认固件有效
+ *   2. pin_init()              — GPIO 初始化
+ *   3. NVS 初始化               — 存储 WiFi 凭据、BLE 配对信息
+ *   4. 网络栈 (netif + event loop)
+ *   5. 注册 WiFi/IP/Provisioning 事件回调
+ *   6. WiFi STA 启动            — Station 模式，设置主机名 "SX70z"
+ *   7. BLE Provisioning         — 未配网则广播，已配网则直接连 WiFi
+ *   8. 启动控制任务到 Core 1     — 独立运行，不受 WiFi/BLE 状态影响
+ *   9. Idle 循环 (RSSI 监控)    — Core 0 空闲，打印 WiFi 信号强度
  */
 
 #include <stdio.h>
@@ -24,7 +30,9 @@
 #include "wifi_provisioning/scheme_ble.h"
 #include "devinfo.h"
 #include "camera_main.h"
+#include "esp_ota_ops.h"
 #include "ota_web.h"
+#include "pin_init.h"
 
 static const char *TAG = "main";
 
@@ -101,16 +109,38 @@ static void prov_event_handler(void *arg, esp_event_base_t event_base,
 
 void app_main(void)
 {
+    /* ---- 0. 确认当前芯片序列号 ---- */
     devinfo_init();
+
+    /* ---- 1. OTA 回滚检查 ---- */
+    const esp_partition_t *running = esp_ota_get_running_partition();
+    esp_ota_img_states_t ota_state;
+    if (esp_ota_get_state_partition(running, &ota_state) == ESP_OK) {
+        ESP_LOGI(TAG, "Running partition: %s, state: %d",
+                running->label, ota_state);
+        if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
+            ESP_LOGI(TAG, "OTA boot confirmed, marking app as valid");
+            esp_ota_mark_app_valid_cancel_rollback();
+        } else if (ota_state == ESP_OTA_IMG_VALID) {
+            ESP_LOGD(TAG, "App already confirmed");
+        } else if (ota_state == ESP_OTA_IMG_NEW) {
+            ESP_LOGI(TAG, "New app, marking as valid");
+            esp_ota_mark_app_valid_cancel_rollback();
+        }
+    } else {
+        ESP_LOGW(TAG, "Cannot read OTA state, partition table may be invalid");
+    }
+
+    /* ---- 2. 引脚初始化 ---- */
+    pin_init();
     ESP_LOGI(TAG, "SX70z starting...");
     ESP_LOGI(TAG, "Model: %s  SN: %s  SW: %d.%d.%d  HW: r%d",
-             device.model, device.serial,
-             device.sw_major, device.sw_minor, device.sw_patch,
-             device.hw_rev);
+            device.model, device.serial,
+            device.sw_major, device.sw_minor, device.sw_patch,
+            device.hw_rev);
 
-    /* ---- 1. NVS 初始化 ----
-     * 存储 WiFi 凭据（wifi_prov_mgr 用 "nvs" 分区）。
-     * 首次使用或分区损坏时自动擦除重建。 */
+
+    /* ---- 3. NVS 初始化 ---- */
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
@@ -118,13 +148,11 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
-    /* ---- 2. 网络栈初始化 ----
-     * esp_netif + event loop 是 WiFi / IP 事件分发的基础设施。 */
+    /* ---- 4. 网络栈初始化 ---- */
     ESP_ERROR_CHECK(esp_netif_init());
     ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-    /* ---- 3. 注册事件回调 ----
-     * 所有回调在独立上下文中执行，不阻塞 app_main。 */
+    /* ---- 5. 注册事件回调 ---- */
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID,
                                                 wifi_event_handler, NULL));
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP,
@@ -132,8 +160,7 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_PROV_EVENT, ESP_EVENT_ANY_ID,
                                                 prov_event_handler, NULL));
 
-    /* ---- 4. WiFi Station 初始化 ----
-     * 仅 STA 模式，不开启 AP。WiFi 启动后若已配网则自动连接。 */
+    /* ---- 6. WiFi STA 启动 ---- */
     esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
     esp_netif_set_hostname(sta_netif, "SX70z");
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -141,17 +168,7 @@ void app_main(void)
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    /* ---- 5. BLE Provisioning ----
-     * 若 NVS 中无 WiFi 凭据，启动 BLE 广播等待手机 App 配网。
-     * wifi_prov_mgr_start_provisioning() 立即返回，配网在后台进行。
-     *
-     * 安全参数：
-     *   - security = WIFI_PROV_SECURITY_1 (Proof of Possession 密码保护)
-     *   - pop = "sx70z123" (配网时需要输入的密码)
-     *   - 设备名 = "SX70z_POP" (BLE 广播名)
-     *
-     * 配网完成后 BLE 保持开启（sdkconfig 已配置 KEEP_BLE_ON），
-     * 后续可在此 NimBLE 实例上注册自定义 Service（数据/控制/OTA）。 */
+    /* ---- 7. BLE Provisioning ---- */
     wifi_prov_mgr_config_t prov_config = {
         .scheme = wifi_prov_scheme_ble,
         .scheme_event_handler = WIFI_PROV_SCHEME_BLE_EVENT_HANDLER_FREE_BTDM,
@@ -173,8 +190,7 @@ void app_main(void)
         esp_wifi_connect();
     }
 
-    /* ---- 6. 启动控制任务到 Core 1 ----
-     * 控制逻辑与 WiFi/BLE 协议栈物理隔离，互不干扰时序。 */
+    /* ---- 8. 启动控制任务到 Core 1 ---- */
     xTaskCreatePinnedToCore(control_task, "control", 4096, NULL, 5,
                             &control_task_handle, 1);
     ESP_LOGI(TAG, "Init done, control task running on Core 1");

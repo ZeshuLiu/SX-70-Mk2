@@ -6,7 +6,7 @@ devinfo_t device = {
     .serial   = "",
     .sw_major = 0,
     .sw_minor = 1,
-    .sw_patch = 4,
+    .sw_patch = 10,
     .hw_rev   = 1,
     .model    = "SX-70 Model Z",
 };

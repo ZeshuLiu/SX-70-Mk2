@@ -56,14 +56,18 @@ SX70_ModelZ/
 
 ```
 app_main() [Core 0]
-  1. devinfo_init()                        — 读芯片 MAC 做序列号
-  2. NVS 初始化                             — 存储 WiFi 凭据、BLE 绑定
-  3. esp_netif + event loop                — 网络栈基础
-  4. 注册 WiFi / IP / Provisioning 事件回调
-  5. WiFi STA 启动 + 设置主机名 "SX70z"
-  6. BLE Provisioning（非阻塞）             — 未配网则广播，已配网则直接连 WiFi
-  7. xTaskCreatePinnedToCore(control_task, 1) — 启动 Core 1 控制任务
-  8. app_main 空闲循环（打印 RSSI 等辅助信息）
+  0. devinfo_init()                        — 读芯片 MAC 做序列号
+  1. OTA 回滚检查                           — 若分区为 PENDING_VERIFY，调用
+                                             esp_ota_mark_app_valid_cancel_rollback()
+                                             确认固件有效（bootloader watchdog 要求）
+  2. pin_init()                            — GPIO 初始化
+  3. NVS 初始化                             — 存储 WiFi 凭据、BLE 绑定
+  4. esp_netif + event loop                — 网络栈基础
+  5. 注册 WiFi / IP / Provisioning 事件回调
+  6. WiFi STA 启动 + 设置主机名 "SX70z"
+  7. BLE Provisioning（非阻塞）             — 未配网则广播，已配网则直接连 WiFi
+  8. xTaskCreatePinnedToCore(control_task, 1) — 启动 Core 1 控制任务
+  9. app_main 空闲循环（打印 RSSI 等辅助信息）
 ```
 
 ### OTA 升级流程
@@ -73,14 +77,31 @@ IP_EVENT_STA_GOT_IP → ota_web_start()
   → 浏览器打开 http://<ESP32_IP>
   → 选 .bin 文件上传
   → POST /update:
-       camera_pause()         ← 挂起 Core 1 控制任务
-       esp_ota_begin()        ← 打开 ota_1 分区
-       esp_ota_write() × N    ← 逐块写入 Flash
-       esp_ota_end()          ← 校验
+       camera_pause()              ← 挂起 Core 1 控制任务
+       esp_ota_begin()             ← 打开 ota_1 分区
+       esp_ota_write() × N         ← 逐块写入 Flash
+       esp_ota_end()               ← 校验
        esp_ota_set_boot_partition(ota_1)
-       esp_restart()          ← 重启进入新固件
-    错误路径: camera_resume() ← 恢复 Core 1 控制任务
+       esp_ota_get_boot_partition() ← 验证启动分区已正确设置
+       esp_restart()               ← 重启进入新固件
+    错误路径: camera_resume()      ← 恢复 Core 1 控制任务
+
+  重启后 → app_main 步骤 1 检测到 PENDING_VERIFY → 调用
+  esp_ota_mark_app_valid_cancel_rollback() 确认新固件有效，回滚取消
 ```
+
+### OTA 回滚机制
+
+`CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y` 启用后：
+
+1. `esp_ota_set_boot_partition()` 将新分区标记为 `PENDING_VERIFY`
+2. Bootloader 启动新固件时设置 watchdog 定时器
+3. **新固件必须在 watchdog 超时前调用 `esp_ota_mark_app_valid_cancel_rollback()`**，否则：
+   - Bootloader 将当前分区标记为 `INVALID`
+   - 下次重启自动回滚到上一个有效分区
+4. 若新固件启动期间崩溃（LoadProhibited 等），bootloader 同样自动回滚
+
+关键调用在 `app_main` 步骤 1，位于所有初始化之前，确保 watchdog 不会意外触发。
 
 ### BLE / WiFi 技术栈
 
@@ -129,4 +150,6 @@ IP_EVENT_STA_GOT_IP → ota_web_start()
 - `freertos` / `esp_mac` 等基础组件自动链接，无需声明 REQUIRES
 - `.vscode/settings.json` 中 `IDF_TARGET` 固定为 `esp32`
 - OTA 升级时必须先 `camera_pause()` 挂起 Core 1，避免 Flash 写冲突导致 LoadProhibited
+- `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y` 要求固件启动后调用 `esp_ota_mark_app_valid_cancel_rollback()`（在 `app_main` 步骤 1 中处理），否则 bootloader watchdog 会触发回滚
+- 若 OTA 后重启仍运行旧固件，检查串口日志中的 "Running partition: xxx, state: x" 确认启动分区和回滚状态
 - `CONFIG_ISSUES.md` 跟踪配置项待办
