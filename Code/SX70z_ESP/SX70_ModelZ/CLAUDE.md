@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Polaroid SX-70 相机控制器，基于 ESP32-PICO-V3 (4MB Flash, 无 PSRAM)，运行 ESP-IDF v5.5.2。
 
-- **硬件**: 自绘 PCB，ESP32-PICO-V3、声纳、闪光灯、快门/光圈控制、PCF8575 I2C GPIO 扩展
+- **硬件**: 自绘 PCB，ESP32-PICO-V3、声纳、闪光灯、快门/光圈控制、PCF8575 I2C GPIO 扩展、SSD1306 OLED、OPT4001 环境光传感器
 - **当前分支**: `Working` — 在原有相机控制代码基础上新增 BLE + WiFi + OTA 功能
 - **ESP-IDF**: `D:\ESPIDF\v5.5.2\esp-idf` / **工具链**: `D:\ESPIDF_TOOL`
 
@@ -46,6 +46,11 @@ SX70_ModelZ/
 │   ├── CMakeLists.txt      # REQUIRES: esp_http_server app_update
 │   ├── devinfo.h / .c      # 设备信息（序列号=芯片 MAC、软硬件版本）
 │   ├── camera_main.h / .c  # 相机控制任务 (Core 1)，含 camera_pause/resume
+│   ├── opt4001.h / .c      # OPT4001 环境光传感器驱动（I2C0, 0x44）
+│   ├── ssd1306.h / .c      # SSD1306 OLED 显示驱动（I2C1）
+│   ├── pcf8575.h / .c      # PCF8575 I2C GPIO 扩展（I2C1, 0x20-0x27）
+│   ├── font.h              # 字体类型定义
+│   ├── fonts/font5x8.h     # 5x8 像素字体
 │   └── ota_web.h / .c      # HTTP 网页上传固件 OTA
 ├── components/             # ESP-IDF 标准组件目录（当前为空）
 ├── sdkconfig
@@ -137,11 +142,33 @@ IP_EVENT_STA_GOT_IP → ota_web_start()
 | `ESP_LOGD` | 调试细节：STA 启动、配网开始/结束、凭据收到、WiFi 未连接 |
 | `ESP_LOGV` | 未启用 |
 
-## Peripheral Hardware (前期已实现，待迁移到 src/)
+## Peripheral Hardware & I2C Bus
 
-- 声纳测距、快门控制、光圈控制、闪光灯同步
-- PCF8575 I2C GPIO 扩展、显示模块
-- 防抖处理、故障诊断
+| 总线 | 引脚 | 速度 | 设备 |
+|------|------|------|------|
+| I2C0 | GPIO21/22 | 100kHz | OPT4001 (0x44) |
+| I2C1 | GPIO7/8 | 400kHz | SSD1306 (0x3C), PCF8575 (0x20-0x27) |
+
+### OPT4001 环境光传感器
+
+- 挂 I2C_NUM_0（GPIO21/22），地址 0x44
+- 初始化在 `control_task` (Core 1) 启动时调 `opt4001_init()`，此时 Core 0 已完成 `pin_init()` 初始化 I2C
+- 自动量程模式，800ms 转换周期，连续采样 — 初始化后首次有效数据延时 900ms
+- I2C 读时序：两次独立事务（写寄存器地址 → STOP → 读数据 → STOP），备选 Repeated Start 方案注释在代码中待验证
+- 量程 0.001 ~ 2,200,000 lux，12 档硬件自动切换
+
+### SSD1306 OLED
+
+- 挂 I2C_NUM_1（GPIO7/8），默认地址 0x3C，400kHz
+- 移植自 tapiocode 的 Pico 驱动，API 保留：`ssd1306_init/show/draw_str/draw_line/draw_rect/draw_circle`
+- 本地帧缓冲 + `ssd1306_show()` 全量刷新到屏幕
+- 字体使用 `font5x8_font`（5x8 像素，96 字符 ASCII）
+
+### PCF8575 I2C GPIO 扩展
+
+- 挂 I2C_NUM_1（GPIO7/8），地址 0x20-0x27
+- 16 位 GPIO，方向可逐位配置（1=输入 0=输出）
+- API：`pcf8575_init/read/write/write_pin/read_pin/set_input/set_output`
 
 ## Development Notes
 

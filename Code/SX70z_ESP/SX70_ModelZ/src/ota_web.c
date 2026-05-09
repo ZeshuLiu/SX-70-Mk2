@@ -5,6 +5,7 @@
  * 局域网内手机或电脑直接操作，无需外网服务器。
  */
 
+#include <stdio.h>
 #include <string.h>
 #include "esp_log.h"
 #include "esp_http_server.h"
@@ -13,65 +14,91 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "camera_main.h"
+#include "devinfo.h"
 
 static const char *TAG = "ota_web";
 
 /* ================================================================
- *  HTML 上传页面
+ *  HTML 上传页面（模板，%s 占位会被替换为设备信息）
  * ================================================================ */
 
-static const char HTML_PAGE[] =
-    "<!DOCTYPE html><html><head><meta charset='utf-8'>"
-    "<meta name='viewport' content='width=device-width,initial-scale=1'>"
-    "<title>SX70z OTA</title>"
-    "<style>"
-    "body{font-family:sans-serif;max-width:400px;margin:40px auto;padding:0 20px}"
-    "h2{color:#333}input,button{font-size:16px;padding:8px 12px;margin:8px 0}"
-    "#bar{width:100%;background:#eee;height:20px;border-radius:4px;overflow:hidden;margin-top:12px}"
-    "#bar div{height:100%;background:#4caf50;width:0%;transition:width 0.2s}"
-    "</style></head><body>"
-    "<h2>SX70z OTA Upgrade</h2>"
-    "<p>Select firmware .bin file to upgrade.</p>"
-    "<input type='file' id='file' accept='.bin'><br>"
-    "<button onclick='upgrade()'>Start Upgrade</button>"
-    "<div id='bar'><div id='prog'></div></div>"
-    "<p id='msg'></p>"
-    "<script>"
-    "function upgrade(){"
-    "  var f=document.getElementById('file').files[0];"
-    "  if(!f){alert('Select a .bin file first');return;}"
-    "  var x=new XMLHttpRequest();"
-    "  x.upload.onprogress=function(e){"
-    "    if(e.lengthComputable){"
-    "      var p=Math.round(e.loaded/e.total*100);"
-    "      document.getElementById('prog').style.width=p+'%';"
-    "      document.getElementById('msg').textContent='Uploading... '+p+'%';"
-    "    }"
-    "  };"
-    "  x.onload=function(){"
-    "    if(x.status==200){"
-    "      document.getElementById('msg').textContent='Done! Restarting...';"
-    "    }else{"
-    "      document.getElementById('msg').textContent='Failed: '+x.responseText;"
-    "    }"
-    "  };"
-    "  x.onerror=function(){"
-    "    document.getElementById('msg').textContent='Network error';"
-    "  };"
-    "  x.open('POST','/update');"
-    "  x.setRequestHeader('Content-Type','application/octet-stream');"
-    "  x.send(f);"
-    "}"
-    "</script></body></html>";
+#define HTML_HEAD \
+    "<!DOCTYPE html><html><head><meta charset='utf-8'>" \
+    "<meta name='viewport' content='width=device-width,initial-scale=1'>" \
+    "<title>SX70z OTA</title>" \
+    "<style>" \
+    "body{font-family:sans-serif;max-width:400px;margin:40px auto;padding:0 20px}" \
+    "table{width:100%%;border-collapse:collapse;margin:12px 0}" \
+    "td{padding:4px 8px;border:1px solid #ddd}" \
+    "td:first-child{background:#f5f5f5;font-weight:bold;width:40%%}" \
+    "h2{color:#333}input,button{font-size:16px;padding:8px 12px;margin:8px 0}" \
+    "#bar{width:100%%;background:#eee;height:20px;border-radius:4px;overflow:hidden;margin-top:12px}" \
+    "#bar div{height:100%%;background:#4caf50;width:0%%;transition:width 0.2s}" \
+    "</style></head><body>" \
+    "<h2>SX70z OTA Upgrade</h2>" \
+    "<table>" \
+    "<tr><td>Serial</td><td>%s</td></tr>" \
+    "<tr><td>Model</td><td>%s</td></tr>" \
+    "<tr><td>Firmware</td><td>v%u.%u.%u</td></tr>" \
+    "<tr><td>Built</td><td>%s</td></tr>" \
+    "<tr><td>Hardware</td><td>Rev %u</td></tr>" \
+    "</table>"
+
+#define HTML_TAIL \
+    "<p>Select firmware .bin file to upgrade.</p>" \
+    "<input type='file' id='file' accept='.bin'><br>" \
+    "<button onclick='upgrade()'>Start Upgrade</button>" \
+    "<div id='bar'><div id='prog'></div></div>" \
+    "<p id='msg'></p>" \
+    "<script>" \
+    "function upgrade(){" \
+    "  var f=document.getElementById('file').files[0];" \
+    "  if(!f){alert('Select a .bin file first');return;}" \
+    "  var x=new XMLHttpRequest();" \
+    "  x.upload.onprogress=function(e){" \
+    "    if(e.lengthComputable){" \
+    "      var p=Math.round(e.loaded/e.total*100);" \
+    "      document.getElementById('prog').style.width=p+'%%';" \
+    "      document.getElementById('msg').textContent='Uploading... '+p+'%%';" \
+    "    }" \
+    "  };" \
+    "  x.onload=function(){" \
+    "    if(x.status==200){" \
+    "      document.getElementById('msg').textContent='Done! Restarting...';" \
+    "    }else{" \
+    "      document.getElementById('msg').textContent='Failed: '+x.responseText;" \
+    "    }" \
+    "  };" \
+    "  x.onerror=function(){" \
+    "    document.getElementById('msg').textContent='Network error';" \
+    "  };" \
+    "  x.open('POST','/update');" \
+    "  x.setRequestHeader('Content-Type','application/octet-stream');" \
+    "  x.send(f);" \
+    "}" \
+    "</script></body></html>"
 
 /* ================================================================
- *  GET / → 返回上传页面
+ *  GET / → 返回上传页面（含设备信息）
  * ================================================================ */
 
 static esp_err_t get_handler(httpd_req_t *req)
 {
+    char page[2048];
+    int len = snprintf(page, sizeof(page),
+                       HTML_HEAD HTML_TAIL,
+                       device.serial,
+                       device.model,
+                       device.sw_major, device.sw_minor, device.sw_patch,
+                       device.build_time,
+                       device.hw_rev);
+
+    if (len >= sizeof(page)) {
+        ESP_LOGW(TAG, "HTML page truncated (%d > %zu)", len, sizeof(page));
+    }
+
     httpd_resp_set_type(req, "text/html; charset=utf-8");
-    httpd_resp_send(req, HTML_PAGE, strlen(HTML_PAGE));
+    httpd_resp_send(req, page, len);
     return ESP_OK;
 }
 

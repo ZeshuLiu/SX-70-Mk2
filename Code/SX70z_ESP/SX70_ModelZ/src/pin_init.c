@@ -63,5 +63,17 @@ void pin_init(void)
     i2c_param_config(I2C_NUM_0, &i2c0_cfg);
     i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0);
 
-    ESP_LOGI(TAG, "GPIO + I2C0 initialized");
+    /* ---- I2C1 (SSD1306 / PCF8575) ---- */
+    i2c_config_t i2c1_cfg = {
+        .mode          = I2C_MODE_MASTER,
+        .sda_io_num    = SDA1_PIN,
+        .scl_io_num    = SCL1_PIN,
+        .sda_pullup_en = GPIO_PULLUP_ENABLE,
+        .scl_pullup_en = GPIO_PULLUP_ENABLE,
+        .master.clk_speed = 400000,
+    };
+    i2c_param_config(I2C_NUM_1, &i2c1_cfg);
+    i2c_driver_install(I2C_NUM_1, I2C_MODE_MASTER, 0, 0, 0);
+
+    ESP_LOGI(TAG, "GPIO + I2C0 + I2C1 initialized");
 }

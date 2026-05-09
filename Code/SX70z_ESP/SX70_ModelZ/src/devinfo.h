@@ -9,7 +9,8 @@ typedef struct {
     uint8_t sw_minor;   /* 软件次版本 */
     uint8_t sw_patch;   /* 软件修订号 */
     uint8_t hw_rev;     /* 硬件版本 */
-    char model[16];     /* 型号 */
+    char build_time[24];    /* 编译时间（__DATE__ __TIME__） */
+    char model[16];         /* 型号 */
 } devinfo_t;
 
 extern devinfo_t device;

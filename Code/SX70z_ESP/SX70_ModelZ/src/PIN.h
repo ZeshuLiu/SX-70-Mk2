@@ -4,8 +4,11 @@
 #define SCL0_PIN GPIO_NUM_21
 #define SDA0_PIN GPIO_NUM_22
 
-#define SCL1_PIN GPIO_NUM_8
-#define SDA1_PIN GPIO_NUM_7
+// #define SCL1_PIN GPIO_NUM_8
+// #define SDA1_PIN GPIO_NUM_7
+
+#define SCL1_PIN GPIO_NUM_12 // 这个只用于开发板测试， 实际需要用上面注释掉的引脚 7 和 8
+#define SDA1_PIN GPIO_NUM_13 // 这个只用于开发板测试， 实际需要用上面注释掉的引脚 7 和 8
 
 // 外设（输出）引脚定义
 #define LED1_PIN GPIO_NUM_20 // 板载LED灯 低电平点亮
