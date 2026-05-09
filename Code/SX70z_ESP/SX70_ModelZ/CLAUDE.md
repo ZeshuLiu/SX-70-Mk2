@@ -1,0 +1,132 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+Polaroid SX-70 相机控制器，基于 ESP32-PICO-V3 (4MB Flash, 无 PSRAM)，运行 ESP-IDF v5.5.2。
+
+- **硬件**: 自绘 PCB，ESP32-PICO-V3、声纳、闪光灯、快门/光圈控制、PCF8575 I2C GPIO 扩展
+- **当前分支**: `Working` — 在原有相机控制代码基础上新增 BLE + WiFi + OTA 功能
+- **ESP-IDF**: `D:\ESPIDF\v5.5.2\esp-idf` / **工具链**: `D:\ESPIDF_TOOL`
+
+## Build & Flash
+
+```bash
+idf.py build                      # 编译
+idf.py -p <PORT> flash            # 烧录 (UART, QIO 80MHz)
+idf.py -p <PORT> monitor          # 串口监视 (UART0, 115200 baud)
+idf.py -p <PORT> erase-flash flash monitor
+```
+
+## Architecture
+
+### 核心设计原则
+
+- **双核隔离**: Core 0 跑所有非控制逻辑（WiFi/BLE/HTTP/日志），Core 1 只跑时序敏感的相机控制。**与控制无关的代码一律放 Core 0**
+- **非阻塞初始化**: WiFi 配网、BLE 连接在后台任务运行，不阻塞主控
+- **事件驱动**: WiFi/IP 状态变更通过 `esp_event` 回调通知
+- **OTA 安全**: OTA 写 Flash 前挂起 Core 1 控制任务（`camera_pause`），完成后恢复或重启
+
+### CPU 分配
+
+```
+Core 0:  WiFi 协议栈 + NimBLE BLE + HTTP Server (OTA Web) + 事件回调 + app_main
+Core 1:  相机控制任务 — 声纳/快门/光圈/闪光灯（时序敏感，与射频中断隔离）
+```
+
+### 目录结构
+
+```
+SX70_ModelZ/
+├── main/
+│   ├── main.c              # WiFi/BLE 初始化，启动控制任务，触发 OTA Web
+│   └── CMakeLists.txt      # REQUIRES: nvs_flash esp_wifi esp_event esp_netif wifi_provisioning src
+├── src/
+│   ├── CMakeLists.txt      # REQUIRES: esp_http_server app_update
+│   ├── devinfo.h / .c      # 设备信息（序列号=芯片 MAC、软硬件版本）
+│   ├── camera_main.h / .c  # 相机控制任务 (Core 1)，含 camera_pause/resume
+│   └── ota_web.h / .c      # HTTP 网页上传固件 OTA
+├── components/             # ESP-IDF 标准组件目录（当前为空）
+├── sdkconfig
+└── CONFIG_ISSUES.md        # 配置问题跟踪清单
+```
+
+### 初始化流程
+
+```
+app_main() [Core 0]
+  1. devinfo_init()                        — 读芯片 MAC 做序列号
+  2. NVS 初始化                             — 存储 WiFi 凭据、BLE 绑定
+  3. esp_netif + event loop                — 网络栈基础
+  4. 注册 WiFi / IP / Provisioning 事件回调
+  5. WiFi STA 启动 + 设置主机名 "SX70z"
+  6. BLE Provisioning（非阻塞）             — 未配网则广播，已配网则直接连 WiFi
+  7. xTaskCreatePinnedToCore(control_task, 1) — 启动 Core 1 控制任务
+  8. app_main 空闲循环（打印 RSSI 等辅助信息）
+```
+
+### OTA 升级流程
+
+```
+IP_EVENT_STA_GOT_IP → ota_web_start()
+  → 浏览器打开 http://<ESP32_IP>
+  → 选 .bin 文件上传
+  → POST /update:
+       camera_pause()         ← 挂起 Core 1 控制任务
+       esp_ota_begin()        ← 打开 ota_1 分区
+       esp_ota_write() × N    ← 逐块写入 Flash
+       esp_ota_end()          ← 校验
+       esp_ota_set_boot_partition(ota_1)
+       esp_restart()          ← 重启进入新固件
+    错误路径: camera_resume() ← 恢复 Core 1 控制任务
+```
+
+### BLE / WiFi 技术栈
+
+| 组件 | 选型 |
+|---|---|
+| BLE 协议栈 | NimBLE (VHCI) |
+| WiFi 配网 | BLE Provisioning (Proof of Possession) |
+| OTA | WiFi HTTP 网页上传 |
+| 分区表 | `partitions_two_ota_large.csv` (ota_0 + ota_1 各 1700KB) |
+
+### sdkconfig 关键配置
+
+- `CONFIG_IDF_TARGET="esp32"` — PICO-V3 在 IDF 中归类为 ESP32
+- `CONFIG_BT_NIMBLE_ENABLED=y` — NimBLE 协议栈
+- `CONFIG_PARTITION_TABLE_TWO_OTA_LARGE=y` — 双 OTA (各 1700KB)
+- `CONFIG_WIFI_PROV_BLE_SEC_CONN=y` — BLE 安全配网
+- `CONFIG_WIFI_PROV_KEEP_BLE_ON_AFTER_PROV=y` — 配网后保持 BLE
+- `CONFIG_BT_NIMBLE_NVS_PERSIST=y` — BLE 配对持久化
+- `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y` — OTA 失败回滚
+- `CONFIG_COMPILER_OPTIMIZATION_DEBUG=y` — 开发阶段用 DEBUG
+- `CONFIG_ESPTOOLPY_FLASHMODE_QIO=y` / `CONFIG_ESPTOOLPY_FLASHFREQ_80M=y` — QIO 80MHz
+- `CONFIG_LOG_DEFAULT_LEVEL_DEBUG=y` — 默认日志级别 DEBUG
+- BLE 设备名 `"SX70z"` / 广播名 `"SX70z_POP"` / PoP `"sx70z123"`
+- WiFi 主机名 `"SX70z"`
+
+### 日志级别约定
+
+| 级别 | 用途 |
+|---|---|
+| `ESP_LOGE` | 错误（始终打印） |
+| `ESP_LOGW` | 警告 |
+| `ESP_LOGI` | 重要信息：WiFi 连接/断开、配网成功/失败、OTA 进度、设备信息 |
+| `ESP_LOGD` | 调试细节：STA 启动、配网开始/结束、凭据收到、WiFi 未连接 |
+| `ESP_LOGV` | 未启用 |
+
+## Peripheral Hardware (前期已实现，待迁移到 src/)
+
+- 声纳测距、快门控制、光圈控制、闪光灯同步
+- PCF8575 I2C GPIO 扩展、显示模块
+- 防抖处理、故障诊断
+
+## Development Notes
+
+- `src/` 通过 `EXTRA_COMPONENT_DIRS` 注册为独立组件，新增 .c 文件需在 `src/CMakeLists.txt` 的 SRCS 中添加
+- 新增组件依赖时注意 CMake 组件名 vs 头文件名不一致（如 `esp_ota_ops.h` → `app_update`）
+- `freertos` / `esp_mac` 等基础组件自动链接，无需声明 REQUIRES
+- `.vscode/settings.json` 中 `IDF_TARGET` 固定为 `esp32`
+- OTA 升级时必须先 `camera_pause()` 挂起 Core 1，避免 Flash 写冲突导致 LoadProhibited
+- `CONFIG_ISSUES.md` 跟踪配置项待办
