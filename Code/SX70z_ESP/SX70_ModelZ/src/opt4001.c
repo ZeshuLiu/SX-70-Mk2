@@ -104,9 +104,36 @@ static esp_err_t opt4001_read_reg(uint8_t reg, uint16_t *data) {
     return ESP_OK;
 }
 
+/* ======================== I2C Scanner (诊断用) ======================== */
+
+void opt4001_i2c_scan(void) {
+    ESP_LOGI(TAG, "Scanning I2C0 (GPIO21=SCL, GPIO22=SDA)...");
+    int found = 0;
+    for (uint8_t addr = 0x01; addr < 0x7F; addr++) {
+        i2c_cmd_handle_t cmd = i2c_cmd_link_create();
+        i2c_master_start(cmd);
+        i2c_master_write_byte(cmd, (addr << 1) | I2C_MASTER_WRITE, true);
+        i2c_master_stop(cmd);
+        esp_err_t ret = i2c_master_cmd_begin(I2C_MASTER_NUM, cmd, pdMS_TO_TICKS(50));
+        i2c_cmd_link_delete(cmd);
+        if (ret == ESP_OK) {
+            ESP_LOGI(TAG, "  Device found at 0x%02X", addr);
+            found++;
+        }
+    }
+    if (found == 0) {
+        ESP_LOGW(TAG, "  No devices found — check SDA/SCL wiring, pull-ups, and power");
+    } else {
+        ESP_LOGI(TAG, "  Scan complete: %d device(s) found", found);
+    }
+}
+
 /* ======================== Public API ======================== */
 
 esp_err_t opt4001_init(void) {
+    /* 扫描 I2C0 总线，诊断硬件连接 */
+    opt4001_i2c_scan();
+
     if (initialized) {
         ESP_LOGW(TAG, "Already initialized");
         return ESP_OK;

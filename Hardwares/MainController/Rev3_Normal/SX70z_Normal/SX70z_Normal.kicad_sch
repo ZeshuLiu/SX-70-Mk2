@@ -6,9 +6,10 @@
 	(paper "A3")
 	(title_block
 		(title "SX70z Normal")
-		(date "2026-05-03")
-		(rev "3.5")
+		(date "2026-05-11")
+		(rev "3.5。1")
 		(comment 1 "Rev3.5 主控换成ESP32 PICO")
+		(comment 2 "Rev3.5.1 EN增加了上电延时，BOOT默认上拉")
 	)
 	(lib_symbols
 		(symbol "Connector:Conn_01x03_Socket"
@@ -4891,6 +4892,12 @@
 		(color 0 0 0 0)
 		(uuid "e2d8ea9d-87c9-4b77-8b68-d79e74b8e6c4")
 	)
+	(junction
+		(at 54.61 52.07)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "fd035313-da5a-47be-b363-1ca8065d6cdb")
+	)
 	(no_connect
 		(at 261.62 35.56)
 		(uuid "00ad1fe7-4aae-4914-b087-66847f5e6664")
@@ -5521,6 +5528,16 @@
 	)
 	(wire
 		(pts
+			(xy 39.37 83.82) (xy 40.64 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "44559c22-3a88-4752-9fab-6d66e32adcee")
+	)
+	(wire
+		(pts
 			(xy 168.91 78.74) (xy 168.91 80.01)
 		)
 		(stroke
@@ -5651,6 +5668,16 @@
 	)
 	(wire
 		(pts
+			(xy 53.34 57.15) (xy 54.61 57.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "550e056f-9cc6-4462-88e7-621f6d1d04c9")
+	)
+	(wire
+		(pts
 			(xy 90.17 261.62) (xy 90.17 262.89)
 		)
 		(stroke
@@ -5751,6 +5778,16 @@
 	)
 	(wire
 		(pts
+			(xy 48.26 83.82) (xy 53.34 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "647f1b1c-fd42-4caf-bcd1-936bb2ca00a9")
+	)
+	(wire
+		(pts
 			(xy 121.92 86.36) (xy 135.89 86.36)
 		)
 		(stroke
@@ -5761,6 +5798,16 @@
 	)
 	(wire
 		(pts
+			(xy 54.61 57.15) (xy 54.61 52.07)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6695e438-5395-475e-95f4-13a545f34719")
+	)
+	(wire
+		(pts
 			(xy 241.3 48.26) (xy 218.44 48.26)
 		)
 		(stroke
@@ -5768,6 +5815,16 @@
 			(type default)
 		)
 		(uuid "6719c974-c713-4c6f-a50a-872871b2093e")
+	)
+	(wire
+		(pts
+			(xy 44.45 57.15) (xy 45.72 57.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "673abeb0-6373-42c7-aa30-06b2d8b754db")
 	)
 	(wire
 		(pts
@@ -5801,7 +5858,7 @@
 	)
 	(wire
 		(pts
-			(xy 45.72 53.34) (xy 52.07 53.34)
+			(xy 53.34 52.07) (xy 54.61 52.07)
 		)
 		(stroke
 			(width 0)
@@ -6261,6 +6318,16 @@
 	)
 	(wire
 		(pts
+			(xy 54.61 52.07) (xy 59.69 52.07)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b142b583-7dd4-4628-9369-28437d23a41e")
+	)
+	(wire
+		(pts
 			(xy 150.495 245.11) (xy 150.495 253.365)
 		)
 		(stroke
@@ -6711,7 +6778,7 @@
 	)
 	(wire
 		(pts
-			(xy 36.83 53.34) (xy 38.1 53.34)
+			(xy 44.45 52.07) (xy 45.72 52.07)
 		)
 		(stroke
 			(width 0)
@@ -7019,6 +7086,16 @@
 		)
 		(uuid "58c1b2b6-4ac7-4a83-8903-dc6d2c32f1ad")
 	)
+	(label "BOOT"
+		(at 53.34 83.82 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "62e9ef11-0577-4a73-b431-6b690068cf74")
+	)
 	(label "S9-3"
 		(at 135.89 129.54 180)
 		(effects
@@ -7080,7 +7157,7 @@
 		(uuid "715943a2-4f93-41b3-b373-fe0309b9c818")
 	)
 	(label "EN"
-		(at 52.07 53.34 180)
+		(at 59.69 52.07 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -8220,7 +8297,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 41.91 53.34 270)
+		(at 49.53 52.07 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8229,7 +8306,7 @@
 		(fields_autoplaced yes)
 		(uuid "1c6db410-5beb-404b-9aaa-623121fd50dc")
 		(property "Reference" "R4"
-			(at 41.91 46.99 90)
+			(at 49.53 45.72 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8237,7 +8314,7 @@
 			)
 		)
 		(property "Value" "10k"
-			(at 41.91 49.53 90)
+			(at 49.53 48.26 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8245,7 +8322,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder"
-			(at 41.91 51.562 90)
+			(at 49.53 50.292 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8254,7 +8331,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 41.91 53.34 0)
+			(at 49.53 52.07 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8263,7 +8340,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 41.91 53.34 0)
+			(at 49.53 52.07 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8281,6 +8358,74 @@
 			(project "SX70z_Normal"
 				(path "/b68e25c7-58ea-4fd3-9614-c4064fa4b280"
 					(reference "R4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 44.45 83.82 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "1d70ee5a-4fc1-47ab-b7a9-85b5dcf6bf48")
+		(property "Reference" "R15"
+			(at 44.45 77.47 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "10k"
+			(at 44.45 80.01 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric_Pad0.72x0.64mm_HandSolder"
+			(at 44.45 82.042 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 44.45 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 44.45 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "ee57a107-fde8-4291-9f90-a59932e4bb65")
+		)
+		(pin "2"
+			(uuid "877e6ee9-5faf-46a0-8a1e-a84eab43daed")
+		)
+		(instances
+			(project "SX70z_Normal"
+				(path "/b68e25c7-58ea-4fd3-9614-c4064fa4b280"
+					(reference "R15")
 					(unit 1)
 				)
 			)
@@ -8354,6 +8499,72 @@
 			(project "opsx_x"
 				(path "/b68e25c7-58ea-4fd3-9614-c4064fa4b280"
 					(reference "Q6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3.3V")
+		(at 39.37 83.82 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2439bc29-adc1-4076-95b5-0ba3ea989a21")
+		(property "Reference" "#PWR010"
+			(at 43.18 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+3.3V"
+			(at 35.56 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 39.37 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 39.37 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 39.37 83.82 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "1d7d8a5b-76ab-4677-8352-ab22fc648c60")
+		)
+		(instances
+			(project "SX70z_Normal"
+				(path "/b68e25c7-58ea-4fd3-9614-c4064fa4b280"
+					(reference "#PWR010")
 					(unit 1)
 				)
 			)
@@ -12283,7 +12494,7 @@
 	)
 	(symbol
 		(lib_id "power:+3.3V")
-		(at 36.83 53.34 90)
+		(at 44.45 52.07 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12292,7 +12503,7 @@
 		(fields_autoplaced yes)
 		(uuid "a8a04a0b-aace-4ea7-8094-e42bf58716fa")
 		(property "Reference" "#PWR03"
-			(at 40.64 53.34 0)
+			(at 48.26 52.07 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12301,7 +12512,7 @@
 			)
 		)
 		(property "Value" "+3.3V"
-			(at 33.02 53.34 0)
+			(at 40.64 52.07 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12309,7 +12520,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 36.83 53.34 0)
+			(at 44.45 52.07 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12318,7 +12529,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 36.83 53.34 0)
+			(at 44.45 52.07 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12327,7 +12538,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 36.83 53.34 0)
+			(at 44.45 52.07 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13292,6 +13503,73 @@
 			(project "opsx_x"
 				(path "/b68e25c7-58ea-4fd3-9614-c4064fa4b280"
 					(reference "#PWR020")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 49.53 57.15 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "d0a95e72-3be6-428c-91b7-f1583daf345b")
+		(property "Reference" "C8"
+			(at 49.53 54.356 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "10uf"
+			(at 49.53 61.214 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 53.34 56.1848 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 49.53 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 49.53 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "aaff8265-b902-42d3-ab54-cf3d10c9ca52")
+		)
+		(pin "1"
+			(uuid "59fd6263-455e-44b4-92ea-27d1653357b3")
+		)
+		(instances
+			(project "SX70z_Normal"
+				(path "/b68e25c7-58ea-4fd3-9614-c4064fa4b280"
+					(reference "C8")
 					(unit 1)
 				)
 			)
@@ -14294,6 +14572,73 @@
 			(project "opsx_x"
 				(path "/b68e25c7-58ea-4fd3-9614-c4064fa4b280"
 					(reference "R10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 44.45 57.15 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f982b89f-7797-4ef7-ab69-a4c82481223d")
+		(property "Reference" "#PWR09"
+			(at 38.1 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 40.64 57.1499 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 44.45 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 44.45 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 44.45 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "66488113-ecd9-4ff3-92ad-0898dd660187")
+		)
+		(instances
+			(project "SX70z_Normal"
+				(path "/b68e25c7-58ea-4fd3-9614-c4064fa4b280"
+					(reference "#PWR09")
 					(unit 1)
 				)
 			)

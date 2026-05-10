@@ -67,7 +67,7 @@ static void draw_pixel(ssd1306_t *dev, uint16_t x, uint16_t y, bool color) {
 }
 
 static void fill_rect(ssd1306_t *dev, int16_t x_in, int16_t y_in,
-                      uint16_t width, uint16_t height, bool color) {
+                    uint16_t width, uint16_t height, bool color) {
     uint16_t x = x_in < 0 ? 0 : x_in;
     uint16_t y = y_in < 0 ? 0 : y_in;
     uint16_t x_end = x + width;

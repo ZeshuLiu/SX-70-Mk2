@@ -46,7 +46,7 @@ void control_task(void *pvParameters)
         ESP_LOGI(TAG, "S2=%d (flash: %s)", gpio_get_level(S2_PIN),
                 gpio_get_level(S2_PIN) == 0 ? "attached" : "none");
         test_led_level = !test_led_level;
-        gpio_set_level(LED_TEST_PIN, test_led_level);
+        gpio_set_level(LED1_PIN, test_led_level);
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
