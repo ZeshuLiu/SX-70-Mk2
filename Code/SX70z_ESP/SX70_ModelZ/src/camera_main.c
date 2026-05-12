@@ -45,6 +45,10 @@ void control_task(void *pvParameters)
     while (1) {
         ESP_LOGI(TAG, "S2=%d (flash: %s)", gpio_get_level(S2_PIN),
                 gpio_get_level(S2_PIN) == 0 ? "attached" : "none");
+        float lux;
+        if (opt4001_read_lux(&lux) == ESP_OK) {
+            ESP_LOGI(TAG, "OPT4001: %.4f lux", lux);
+        }
         test_led_level = !test_led_level;
         gpio_set_level(LED1_PIN, test_led_level);
         vTaskDelay(pdMS_TO_TICKS(1000));
