@@ -83,7 +83,7 @@ app_main() [Core 0]
      └─ control_task() 内部：
         ├─ SSD1306 + PCF8575 初始化
         ├─ 创建 metering_task (prio 3) — OPT4001 初始化 + 1s 周期测光
-        ├─ 初始化 delay_us_timer (esp_timer) — us 级精确定时基础设施
+        ├─ 初始化 GPTimer — us 级精确定时 (1MHz, intr_priority=1 绑定 Core 1)
         ├─ 创建 shutter_task (prio 10) — 平时阻塞，xTaskNotifyGive 触发
         └─ 主循环：S2 检测 + LED 闪烁 (1s)
   9. app_main 空闲循环（打印 RSSI 等辅助信息）
@@ -230,11 +230,13 @@ camera_state_t
 
 ### us 级精确定时 (`delay_us`)
 
-基于 `esp_timer` 实现（`camera_main.c:48-64`）：
-- `delay_us_timer` — 持久化的 one-shot esp_timer
-- `delay_timer_cb` — 回调设 `g_timer_done` 标志位（运行在 esp_timer task, prio 22，可抢占 Core 1 所有任务）
-- `delay_us(uint32_t us)` — 忙等指定微秒，期间不释放 CPU
-- 精度：±1μs（esp_timer 底层 1MHz 硬件定时器 + ISR 回调）
+基于 GPTimer 实现（`camera_main.c:23-49`）：
+- `g_delay_timer` — GPTimer handle (1MHz = 1μs, one-shot alarm, 无自动重载)
+- `delay_timer_cb` — `IRAM_ATTR` ISR 回调设 `g_timer_done` 标志位
+- **`intr_priority = 1`** 确保 ISR 绑定到 Core 1（`priority=0` 走默认分配，不保证核亲和）
+- `delay_us(uint32_t us)` — 重设 alarm + 启动 timer + 忙等，期间不释放 CPU
+- 精度：±2μs（硬件定时器 ISR 同核直连，零跨核开销）
+- IRAM 安全：驱动内部 `GPTIMER_INTR_ALLOC_FLAGS` 默认含 `ESP_INTR_FLAG_IRAM`
 
 ### Shutter Task 使用方式
 

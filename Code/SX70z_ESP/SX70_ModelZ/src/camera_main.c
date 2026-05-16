@@ -6,7 +6,7 @@
 #include "pcf8575.h"
 #include "PIN.h"
 #include "esp_log.h"
-#include "esp_timer.h"
+#include "driver/gptimer.h"
 #include "driver/gpio.h"
 
 static const char *TAG = "camera";
@@ -20,19 +20,32 @@ pcf8575_t gpio_expander;
 
 static TaskHandle_t shutter_task_handle = NULL;
 
-/* ---- us 级精确定时器（esp_timer 回调设标志位 + 忙等） ---- */
+/* ---- us 级精确定时器（GPTimer one-shot alarm + ISR, Core 1 同核） ---- */
 static volatile bool g_timer_done;
-static esp_timer_handle_t delay_us_timer;
+static gptimer_handle_t g_delay_timer;
 
-static void IRAM_ATTR delay_timer_cb(void *arg)
+static bool IRAM_ATTR delay_timer_cb(gptimer_handle_t timer,
+                                      const gptimer_alarm_event_data_t *edata,
+                                      void *user_ctx)
 {
     g_timer_done = true;
+    return false;
 }
+
+static gptimer_alarm_config_t g_alarm_cfg = {
+    .alarm_count = 0,
+    .reload_count = 0,
+    .flags.auto_reload_on_alarm = false,
+};
 
 static void delay_us(uint32_t us)
 {
+    gptimer_stop(g_delay_timer);
+    gptimer_set_raw_count(g_delay_timer, 0);
+    g_alarm_cfg.alarm_count = us;
+    gptimer_set_alarm_action(g_delay_timer, &g_alarm_cfg);
     g_timer_done = false;
-    esp_timer_start_once(delay_us_timer, us);
+    gptimer_start(g_delay_timer);
     while (!g_timer_done) {
         __asm__("nop");
     }
@@ -275,12 +288,20 @@ void control_task(void *pvParameters)
     xTaskCreatePinnedToCore(metering_task, "metering", 2048, NULL,
                             METERING_TASK_PRIO, NULL, 1);
 
-    /* ---- 初始化 us 级精确定时器 ---- */
-    esp_timer_create_args_t timer_args = {
-        .callback = delay_timer_cb,
-        .name = "delay_us",
+    /* ---- 初始化 us 级精确定时器（GPTimer，ISR 绑定 Core 1） ---- */
+    gptimer_config_t tcfg = {
+        .clk_src = GPTIMER_CLK_SRC_DEFAULT,
+        .direction = GPTIMER_COUNT_UP,
+        .resolution_hz = 1000000,  // 1MHz → 1μs
+        .intr_priority = 1,
     };
-    esp_timer_create(&timer_args, &delay_us_timer);
+    gptimer_new_timer(&tcfg, &g_delay_timer);
+
+    gptimer_event_callbacks_t cbs = {
+        .on_alarm = delay_timer_cb,
+    };
+    gptimer_register_event_callbacks(g_delay_timer, &cbs, NULL);
+    gptimer_enable(g_delay_timer);
 
     /* ---- 启动快门任务（Core 1，最高优先级，平时阻塞） ---- */
     xTaskCreatePinnedToCore(shutter_task, "shutter", 2048, NULL,
