@@ -191,7 +191,7 @@ void app_main(void)
     }
 
     /* ---- 8. 启动控制任务到 Core 1 ---- */
-    xTaskCreatePinnedToCore(control_task, "control", 8192, NULL, 5,
+    xTaskCreatePinnedToCore(control_task, "control", 8192, NULL, CONTROL_TASK_PRIO,
                             &control_task_handle, 1);
     ESP_LOGI(TAG, "Init done, control task running on Core 1");
 

@@ -32,8 +32,15 @@ idf.py -p <PORT> erase-flash flash monitor
 
 ```
 Core 0:  WiFi 协议栈 + NimBLE BLE + HTTP Server (OTA Web) + 事件回调 + app_main
-Core 1:  相机控制任务 — 声纳/快门/光圈/闪光灯（时序敏感，与射频中断隔离）
+Core 1:  相机控制（与射频中断隔离），3 个任务按优先级分层：
+         Shutter Task  prio 10  强时序引脚控制（平时阻塞，触发后独占 Core 1）
+         Control Task  prio 8   主控逻辑（按键/显示/状态机）
+         Metering Task prio 3   后台测光（OPT4001，1s 周期）
 ```
+
+**优先级定义**见 `camera_main.h`：`SHUTTER_TASK_PRIO=10`, `CONTROL_TASK_PRIO=8`, `METERING_TASK_PRIO=3`
+
+**Shutter Task 独占机制**：优先级最高 + 忙等不释放 CPU，保证时序不受其他任务抢占。通过 `xTaskNotifyGive` 触发，执行完回到 `ulTaskNotifyTake` 阻塞。未来快门/电机等几十秒的强时序工作均在此任务完成。
 
 ### 目录结构
 
@@ -43,9 +50,10 @@ SX70_ModelZ/
 │   ├── main.c              # WiFi/BLE 初始化，启动控制任务，触发 OTA Web
 │   └── CMakeLists.txt      # REQUIRES: nvs_flash esp_wifi esp_event esp_netif wifi_provisioning src
 ├── src/
-│   ├── CMakeLists.txt      # REQUIRES: esp_http_server app_update
+│   ├── CMakeLists.txt      # REQUIRES: esp_http_server app_update driver esp_timer
 │   ├── devinfo.h / .c      # 设备信息（序列号=芯片 MAC、软硬件版本）
-│   ├── camera_main.h / .c  # 相机控制任务 (Core 1)，含 camera_pause/resume
+│   ├── camera_main.h / .c  # 相机控制任务 (Core 1)，camera_state_t 类型定义，camera_pause/resume
+│   ├── display_manager.h / .c # SSD1306 显示帧绘制（show_frame 适配）
 │   ├── opt4001.h / .c      # OPT4001 环境光传感器驱动（I2C0, 0x44）
 │   ├── ssd1306.h / .c      # SSD1306 OLED 显示驱动（I2C1）
 │   ├── pcf8575.h / .c      # PCF8575 I2C GPIO 扩展（I2C1, 0x20-0x27）
@@ -71,7 +79,13 @@ app_main() [Core 0]
   5. 注册 WiFi / IP / Provisioning 事件回调
   6. WiFi STA 启动 + 设置主机名 "SX70z"
   7. BLE Provisioning（非阻塞）             — 未配网则广播，已配网则直接连 WiFi
-  8. xTaskCreatePinnedToCore(control_task, 1) — 启动 Core 1 控制任务
+  8. xTaskCreatePinnedToCore(control_task, 1) — 启动 Core 1 控制任务（prio 8）
+     └─ control_task() 内部：
+        ├─ SSD1306 + PCF8575 初始化
+        ├─ 创建 metering_task (prio 3) — OPT4001 初始化 + 1s 周期测光
+        ├─ 初始化 delay_us_timer (esp_timer) — us 级精确定时基础设施
+        ├─ 创建 shutter_task (prio 10) — 平时阻塞，xTaskNotifyGive 触发
+        └─ 主循环：S2 检测 + LED 闪烁 (1s)
   9. app_main 空闲循环（打印 RSSI 等辅助信息）
 ```
 
@@ -152,7 +166,7 @@ IP_EVENT_STA_GOT_IP → ota_web_start()
 ### OPT4001 环境光传感器
 
 - 挂 I2C_NUM_0（GPIO21/22），地址 0x44
-- 初始化在 `control_task` (Core 1) 启动时调 `opt4001_init()`，此时 Core 0 已完成 `pin_init()` 初始化 I2C
+- 初始化在 `metering_task` (Core 1, prio 3) 中调 `opt4001_init()`，由 `control_task` 创建该任务
 - 自动量程模式，800ms 转换周期，连续采样 — 初始化后首次有效数据延时 900ms
 - I2C 读时序：两次独立事务（写寄存器地址 → STOP → 读数据 → STOP），备选 Repeated Start 方案注释在代码中待验证
 - 量程 0.001 ~ 2,200,000 lux，12 档硬件自动切换
@@ -170,7 +184,65 @@ IP_EVENT_STA_GOT_IP → ota_web_start()
 - 16 位 GPIO，方向可逐位配置（1=输入 0=输出）
 - API：`pcf8575_init/read/write/write_pin/read_pin/set_input/set_output`
 
+### 快门控制 (Shutter Expose)
+
+完整移植自 `SX70Mk2/camera/shutter.c` 的 `shutter_expose()`，运行在 `shutter_task` (prio 10)：
+
+```
+1. 关快门 (SOL1 high, 30ms)
+2. 电机启动 → 等 S3 反光板就位 → 电机停
+3. Y delay (18ms, 闪光模式 + SOL2 光圈)
+4. 曝光 (根据 mode):
+   '1' Normal  — 开快门 → delay_us(时间×100) → 关快门
+   '0' Flash   — 开快门 → 47ms → FF 脉冲 → gap 延时 → 关快门
+   'B' Bulb    — 开快门 → 等 S1T 释放
+   'T' Time    — 开快门 → 等 S1T 释放 → 等 S1T 再按下
+5. 关快门 + 30ms + 18ms
+6. 光圈归位 (闪光模式)
+7. 电机吐片 → 等 S5 胶片检测
+8. 等 S1T 释放防连拍
+```
+
+- 快门速度表：22 档 (`"1s"` ~ `"1/2000C"`)，时间 (0.1ms 单位) 移植自参考 `metering.c`
+- 当前用 GPIO 高低电平控制 SOL1/SOL2，后续可升级为 ESP32 LEDC PWM（100% 吸合 / 40% 保持）
+- `#define HAS_FOCUS 0` 控制对焦功能编译开关，当前为 TODO 占位
+- S1T 去抖：`debounce_read_s1pin()` 计数器方式 (`S1_DEBOUNCE_COUNT=5`)
+
 ## Development Notes
+
+### camera_state_t 参数结构体
+
+相机所有状态集中在 `camera_state_t camera_state`（`camera_main.c` 定义，`camera_main.h` extern 声明），含嵌套子结构：
+
+```
+camera_state_t
+├── if_display                  OLED 是否可用
+├── metering_state_t metering   测光参数
+│   └── last_lux                OPT4001 最新测光值
+├── button_state_t button       按键参数
+│   ├── available               PCF8575 是否可用
+│   ├── old_value[4]            上次按键状态（"111" 格式）
+│   ├── debounce_last           防抖计时 (ms)
+│   └── push_down_start         按下计时 (ms)
+├── menu / cam_mode / shut_mode / shutter_speed  曝光/模式参数
+└── test_led_level              调试 LED 电平
+```
+
+### us 级精确定时 (`delay_us`)
+
+基于 `esp_timer` 实现（`camera_main.c:48-64`）：
+- `delay_us_timer` — 持久化的 one-shot esp_timer
+- `delay_timer_cb` — 回调设 `g_timer_done` 标志位（运行在 esp_timer task, prio 22，可抢占 Core 1 所有任务）
+- `delay_us(uint32_t us)` — 忙等指定微秒，期间不释放 CPU
+- 精度：±1μs（esp_timer 底层 1MHz 硬件定时器 + ISR 回调）
+
+### Shutter Task 使用方式
+
+```c
+// 触发快门动作（可在 control_task 或其他任务中调用）
+xTaskNotifyGive(shutter_task_handle);
+// shutter_task 立即抢占 Core 1，执行完回到阻塞态
+```
 
 - `src/` 通过 `EXTRA_COMPONENT_DIRS` 注册为独立组件，新增 .c 文件需在 `src/CMakeLists.txt` 的 SRCS 中添加
 - 新增组件依赖时注意 CMake 组件名 vs 头文件名不一致（如 `esp_ota_ops.h` → `app_update`）
