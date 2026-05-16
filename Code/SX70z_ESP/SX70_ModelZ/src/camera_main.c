@@ -8,6 +8,8 @@
 #include "esp_log.h"
 #include "driver/gptimer.h"
 #include "driver/gpio.h"
+#include "driver/ledc.h"
+#include "esp_task_wdt.h"
 
 static const char *TAG = "camera";
 
@@ -49,6 +51,42 @@ static void delay_us(uint32_t us)
     while (!g_timer_done) {
         __asm__("nop");
     }
+}
+
+/* ---- LEDC PWM 电磁铁控制（100% 吸合 / 40% 保持） ---- */
+#define SOL1_DUTY_FULL  255   // 100% pull-in
+#define SOL1_DUTY_HOLD  102   // 40% hold
+#define SOL2_DUTY_ON    255   // aperture engage
+#define SOL2_DUTY_OFF   0
+
+static void sol1_pull(void)
+{
+    ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, SOL1_DUTY_FULL);
+    ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0);
+}
+
+static void sol1_hold(void)
+{
+    ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, SOL1_DUTY_HOLD);
+    ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0);
+}
+
+static void sol1_release(void)
+{
+    ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0, SOL2_DUTY_OFF);
+    ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_0);
+}
+
+static void sol2_engage(void)
+{
+    ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, SOL2_DUTY_ON);
+    ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1);
+}
+
+static void sol2_disengage(void)
+{
+    ledc_set_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1, SOL2_DUTY_OFF);
+    ledc_update_duty(LEDC_HIGH_SPEED_MODE, LEDC_CHANNEL_1);
 }
 
 camera_state_t camera_state = {
@@ -123,11 +161,14 @@ static void metering_task(void *pvParameters)
     }
     ESP_LOGI(TAG, "OPT4001 sensor initialized");
 
+    static int opt_log_cnt = 0;
     while (1) {
         float lux;
         if (opt4001_read_lux(&lux) == ESP_OK) {
             camera_state.metering.last_lux = lux;
-            ESP_LOGD(TAG, "OPT4001: %.4f lux", lux);
+            if (++opt_log_cnt % 5 == 0) {
+                ESP_LOGI(TAG, "OPT4001: %.4f lux", lux);
+            }
         }
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
@@ -163,54 +204,56 @@ static void shutter_task(void *pvParameters)
 
         // ---- 1. 关闭快门 ----
         ESP_LOGD(TAG, "Shutter close");
-        gpio_set_level(SOL1_PIN, 1);  // shutter_close → 高电平关闭快门
-        delay_us(30000);               // 30ms
+        sol1_pull();                    // 100% 吸合
+        delay_us(30000);                // 30ms
+        sol1_hold();                    // 40% 保持
         ESP_LOGD(TAG, "Shutter closed");
 
         // ---- 2. 电机启动，反光板上升 ----
         gpio_set_level(MOTOR_PIN, 1);
-        ESP_LOGD(TAG, "Motor start (mirror up)");
+        ESP_LOGI(TAG, "Motor start (mirror up)");
 
         // 等待反光板就位 (S3 变高)
         while (gpio_get_level(S3_PIN) == 0) {
             delay_us(100);
         }
         gpio_set_level(MOTOR_PIN, 0);
-        ESP_LOGD(TAG, "Motor stopped");
+        ESP_LOGI(TAG, "Motor stopped");
 
         // ---- 3. Y Delay ----
         if (mode == '0') {  // SHUTTER_FLASH
-            gpio_set_level(SOL2_PIN, 1);  // 光圈就位
-            ESP_LOGD(TAG, "Aperture engaged");
+            sol2_engage();
+            ESP_LOGI(TAG, "Aperture engaged");
         }
         delay_us(18000);  // 18ms Y delay
 
         // ---- 4. 曝光 ----
-        ESP_LOGD(TAG, "Exposure: mode=%c, delay=%d (0.1ms)", mode, shutter_delay_x10);
+        ESP_LOGI(TAG, "Exposure: mode=%c, delay=%d (0.1ms)", mode, shutter_delay_x10);
 
         if (mode == '1') {  // SHUTTER_NORMAL
-            gpio_set_level(SOL1_PIN, 0);  // shutter_open
+            sol1_release();                               // shutter_open
             delay_us((uint32_t)shutter_delay_x10 * 100);  // 0.1ms → us
-            gpio_set_level(SOL1_PIN, 1);  // shutter_close
-            delay_us(100000);  // 100ms
+            sol1_pull();                                  // 100% 吸合
+            delay_us(30000);                               // 30ms
+            sol1_hold();                                  // 40% 保持
 
         } else if (mode == '0') {  // SHUTTER_FLASH
             int gap = (int)shutter_delay_x10 - 470;
             if (gap < 0) gap = 0;
 
-            gpio_set_level(SOL1_PIN, 0);  // shutter_open
-            delay_us(47000);  // 47ms
+            sol1_release();               // shutter_open
+            delay_us(47000);              // 47ms
 
             gpio_set_level(FF_PIN, 1);     // 触发闪光灯
             delay_us(1000);                // 1ms
             gpio_set_level(FF_PIN, 0);
             delay_us((uint32_t)gap * 100); // 剩余延时
 
-            gpio_set_level(SOL1_PIN, 1);  // shutter_close
+            sol1_pull();                  // 100% 吸合
 
         } else if (mode == 'B') {  // SHUTTER_BULB
-            gpio_set_level(SOL1_PIN, 0);  // shutter_open
-            delay_us(15000);  // 15ms
+            sol1_release();               // shutter_open
+            delay_us(15000);              // 15ms
 
             // 等待 S1T 释放
             while (gpio_get_level(S1T_PIN) == 0) {
@@ -218,7 +261,7 @@ static void shutter_task(void *pvParameters)
             }
 
         } else if (mode == 'T') {  // SHUTTER_TIME
-            gpio_set_level(SOL1_PIN, 0);  // shutter_open
+            sol1_release();               // shutter_open
 
             // 等待 S1T 释放
             while (gpio_get_level(S1T_PIN) == 0) {
@@ -231,20 +274,21 @@ static void shutter_task(void *pvParameters)
         }
 
         // ---- 5. 关闭快门，曝光结束 ----
-        gpio_set_level(SOL1_PIN, 1);  // shutter_close
+        sol1_pull();                    // 100% 吸合
         ESP_LOGD(TAG, "Shutter closing");
-        delay_us(30000);   // 30ms
-        delay_us(18000);   // 18ms
+        delay_us(30000);                // 30ms
+        sol1_hold();                    // 40% 保持
+        delay_us(18000);                // 18ms
 
         // ---- 6. 光圈归位 ----
         if (mode == '0') {  // SHUTTER_FLASH
-            gpio_set_level(SOL2_PIN, 0);  // aperture_disengage
-            ESP_LOGD(TAG, "Aperture disengaged");
+            sol2_disengage();
+            ESP_LOGI(TAG, "Aperture disengaged");
         }
 
         // ---- 7. 电机启动吐片 ----
         gpio_set_level(MOTOR_PIN, 1);
-        ESP_LOGD(TAG, "Motor start (film ejection)");
+        ESP_LOGI(TAG, "Motor start (film ejection)");
 
         // 等待 S5 变低（胶片检测）
         while (gpio_get_level(S5_PIN) != 0) {
@@ -252,7 +296,7 @@ static void shutter_task(void *pvParameters)
         }
 
         gpio_set_level(MOTOR_PIN, 0);
-        gpio_set_level(SOL1_PIN, 0);  // shutter_open
+        sol1_release();               // shutter_open
         ESP_LOGI(TAG, "Film ejection complete");
 
         // ---- 8. 等待 S1T 释放，防止连拍 ----
@@ -265,7 +309,7 @@ static void shutter_task(void *pvParameters)
 void control_task(void *pvParameters)
 {
     /* ---- SSD1306 OLED（I2C1, 0x3C, 128x64） ---- */
-    if (ssd1306_init(&display, 128, 64, 0x3C, I2C_NUM_1, false)) {
+    if (ssd1306_init(&display, 128, 32, 0x3C, I2C_NUM_1, false)) {
         ssd1306_clear(&display);
         ssd1306_draw_str(&display, 0, 0, "SX70z Ready", &font5x8_font);
         ssd1306_show(&display);
@@ -303,20 +347,62 @@ void control_task(void *pvParameters)
     gptimer_register_event_callbacks(g_delay_timer, &cbs, NULL);
     gptimer_enable(g_delay_timer);
 
+    /* ---- 初始化 LEDC PWM（SOL1: 快门电磁铁, SOL2: 光圈电磁铁, 8-bit 31.25kHz） ---- */
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode = LEDC_HIGH_SPEED_MODE,
+        .duty_resolution = LEDC_TIMER_8_BIT,
+        .timer_num = LEDC_TIMER_0,
+        .freq_hz = 31250,
+        .clk_cfg = LEDC_AUTO_CLK,
+    };
+    ledc_timer_config(&ledc_timer);
+
+    ledc_channel_config_t sol1_ch = {
+        .gpio_num   = SOL1_PIN,
+        .speed_mode = LEDC_HIGH_SPEED_MODE,
+        .channel    = LEDC_CHANNEL_0,
+        .timer_sel  = LEDC_TIMER_0,
+        .duty       = 0,
+        .hpoint     = 0,
+    };
+    ledc_channel_config(&sol1_ch);
+
+    ledc_channel_config_t sol2_ch = {
+        .gpio_num   = SOL2_PIN,
+        .speed_mode = LEDC_HIGH_SPEED_MODE,
+        .channel    = LEDC_CHANNEL_1,
+        .timer_sel  = LEDC_TIMER_0,
+        .duty       = 0,
+        .hpoint     = 0,
+    };
+    ledc_channel_config(&sol2_ch);
+    ESP_LOGI(TAG, "LEDC PWM initialized (31.25kHz, 8-bit)");
+
     /* ---- 启动快门任务（Core 1，最高优先级，平时阻塞） ---- */
     xTaskCreatePinnedToCore(shutter_task, "shutter", 2048, NULL,
                             SHUTTER_TASK_PRIO, &shutter_task_handle, 1);
 
     while (1) {
-        // 闪光灯检测
+        // 闪光灯检测（带防抖）
+        static int flash_debounce = 0;
         bool flash_connected = (gpio_get_level(S2_PIN) == 0);
+        if (flash_connected) {
+            flash_debounce = (flash_debounce < 10) ? flash_debounce + 1 : 10;
+        } else {
+            flash_debounce = (flash_debounce > 0) ? flash_debounce - 1 : 0;
+        }
+        if (flash_debounce >= 8) {
+            camera_state.shut_mode = '0';  // 闪光灯模式
+        } else if (flash_debounce <= 2) {
+            camera_state.shut_mode = '1';  // 普通模式
+        }
 
         // S1 去抖读取
         debounce_read_s1pin();
         bool s1t_pressed = (s1t > 0);
 
         // S1T 全按快门 → 触发快门任务（参考 if s1t_pressed == 1）
-        if (s1t_pressed) {
+        if (! s1t_pressed) {
             if (camera_state.menu != 10) {
                 xTaskNotifyGive(shutter_task_handle);
             }
@@ -324,9 +410,12 @@ void control_task(void *pvParameters)
 
         display_show_frame(&camera_state, &display);
 
-        ESP_LOGD(TAG, "S1T=%d Flash=%d Mode=%s LUX=%.2f",
-                s1t_pressed, flash_connected,
-                camera_state.cam_mode, camera_state.metering.last_lux);
+        static int ctrl_log_cnt = 0;
+        if (++ctrl_log_cnt % 5 == 0) {
+            ESP_LOGI(TAG, "S1T=%d Flash=%d Mode=%s LUX=%.2f",
+                    s1t_pressed, flash_connected,
+                    camera_state.cam_mode, camera_state.metering.last_lux);
+        }
 
         camera_state.test_led_level = !camera_state.test_led_level;
         gpio_set_level(LED1_PIN, camera_state.test_led_level);

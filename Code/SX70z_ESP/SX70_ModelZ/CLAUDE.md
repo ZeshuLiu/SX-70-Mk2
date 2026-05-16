@@ -81,7 +81,7 @@ app_main() [Core 0]
   7. BLE Provisioning（非阻塞）             — 未配网则广播，已配网则直接连 WiFi
   8. xTaskCreatePinnedToCore(control_task, 1) — 启动 Core 1 控制任务（prio 8）
      └─ control_task() 内部：
-        ├─ SSD1306 + PCF8575 初始化
+        ├─ SSD1306 初始化（esp_lcd 官方驱动, 128×32） + PCF8575 初始化
         ├─ 创建 metering_task (prio 3) — OPT4001 初始化 + 1s 周期测光
         ├─ 初始化 GPTimer — us 级精确定时 (1MHz, intr_priority=1 绑定 Core 1)
         ├─ 创建 shutter_task (prio 10) — 平时阻塞，xTaskNotifyGive 触发
@@ -173,9 +173,11 @@ IP_EVENT_STA_GOT_IP → ota_web_start()
 
 ### SSD1306 OLED
 
-- 挂 I2C_NUM_1（GPIO7/8），默认地址 0x3C，400kHz
-- 移植自 tapiocode 的 Pico 驱动，API 保留：`ssd1306_init/show/draw_str/draw_line/draw_rect/draw_circle`
-- 本地帧缓冲 + `ssd1306_show()` 全量刷新到屏幕
+- 挂 I2C_NUM_1（GPIO7/8），默认地址 0x3C，100kHz
+- **128×32 像素**（注意不是 64！）
+- 基于 ESP-IDF 官方 `esp_lcd` 驱动（`esp_lcd_panel_ssd1306`），init/写屏/开关由官方库处理
+- 自维护本地帧缓冲 `dev->buff`（512 bytes），绘图 API 保留：`ssd1306_draw_str/line/rect/circle` 等
+- `ssd1306_show()` 通过 `esp_lcd_panel_draw_bitmap()` 全量刷新到屏幕
 - 字体使用 `font5x8_font`（5x8 像素，96 字符 ASCII）
 
 ### PCF8575 I2C GPIO 扩展

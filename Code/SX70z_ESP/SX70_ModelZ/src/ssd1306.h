@@ -1,21 +1,22 @@
-/* ssd1306.h - SSD1306 OLED display driver (ported from tapiocode) */
+/* ssd1306.h - SSD1306 OLED display driver (ESP-IDF esp_lcd backend) */
 
 #pragma once
 
+#include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <driver/i2c.h>
+#include "esp_lcd_types.h"
 #include "font.h"
 
 typedef struct {
     uint16_t width;
     uint16_t height;
     uint16_t pages;
-    uint8_t i2c_addr;
-    i2c_port_t i2c_port;
-    bool external_vcc;
     uint8_t *buff;
     size_t buff_size;
+    esp_lcd_panel_handle_t panel;
+    esp_lcd_panel_io_handle_t io;
 } ssd1306_t;
 
 bool ssd1306_init(ssd1306_t *dev, uint16_t width, uint16_t height,
