@@ -135,6 +135,25 @@ uint16_t get_shutter_time_x10(uint8_t index)
     return shutter_times_x10[index];
 }
 
+// GPIO 防抖（移植自 RP2040 原版：连续 N 采样确认）
+#define GPIO_DEBOUNCE_COUNT 5
+
+static bool gpio_debounce_defaultLow(int pin) {
+    for (int i = 0; i < GPIO_DEBOUNCE_COUNT; i++) {
+        if (!gpio_get_level(pin)) return false;
+        delay_us(7);
+    }
+    return true;
+}
+
+static bool gpio_debounce_defaultHigh(int pin) {
+    for (int i = 0; i < GPIO_DEBOUNCE_COUNT; i++) {
+        if (gpio_get_level(pin)) return true;
+        delay_us(7);
+    }
+    return false;
+}
+
 // S1 按键去抖计数
 #define S1_DEBOUNCE_COUNT 5
 static uint8_t s1f = 0;
@@ -213,8 +232,8 @@ static void shutter_task(void *pvParameters)
         gpio_set_level(MOTOR_PIN, 1);
         ESP_LOGI(TAG, "Motor start (mirror up)");
 
-        // 等待反光板就位 (S3 变高)
-        while (gpio_get_level(S3_PIN) == 0) {
+        // 等待反光板就位 (S3 变高, 5×7µs 防抖)
+        while (!gpio_debounce_defaultLow(S3_PIN)) {
             delay_us(100);
         }
         gpio_set_level(MOTOR_PIN, 0);
@@ -290,8 +309,8 @@ static void shutter_task(void *pvParameters)
         gpio_set_level(MOTOR_PIN, 1);
         ESP_LOGI(TAG, "Motor start (film ejection)");
 
-        // 等待 S5 变低（胶片检测）
-        while (gpio_get_level(S5_PIN) != 0) {
+        // 等待 S5 变低（胶片检测, 5×7µs 防抖）
+        while (gpio_debounce_defaultHigh(S5_PIN)) {
             delay_us(100);
         }
 
