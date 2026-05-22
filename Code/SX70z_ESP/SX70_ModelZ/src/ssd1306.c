@@ -72,7 +72,15 @@ bool ssd1306_init(ssd1306_t *dev, uint16_t width, uint16_t height,
         .flags.disable_control_phase = 0,
         .scl_speed_hz = 0,          // v1 driver uses pre-configured bus speed
     };
-    ESP_ERROR_CHECK(esp_lcd_new_panel_io_i2c_v1((uint32_t)i2c_port, &io_cfg, &dev->io));
+    esp_err_t ret;
+
+    ret = esp_lcd_new_panel_io_i2c_v1((uint32_t)i2c_port, &io_cfg, &dev->io);
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "I2C panel IO init failed: %s", esp_err_to_name(ret));
+        free(dev->buff);
+        dev->buff = NULL;
+        return false;
+    }
 
     // SSD1306 panel
     esp_lcd_panel_ssd1306_config_t ssd1306_cfg = { .height = height };
@@ -81,13 +89,42 @@ bool ssd1306_init(ssd1306_t *dev, uint16_t width, uint16_t height,
         .bits_per_pixel = 1,
         .vendor_config = &ssd1306_cfg,
     };
-    ESP_ERROR_CHECK(esp_lcd_new_panel_ssd1306(dev->io, &panel_cfg, &dev->panel));
+    ret = esp_lcd_new_panel_ssd1306(dev->io, &panel_cfg, &dev->panel);
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "Panel create failed: %s", esp_err_to_name(ret));
+        esp_lcd_panel_io_del(dev->io);
+        free(dev->buff);
+        dev->io = NULL;
+        dev->buff = NULL;
+        return false;
+    }
 
-    ESP_ERROR_CHECK(esp_lcd_panel_reset(dev->panel));
-    ESP_ERROR_CHECK(esp_lcd_panel_init(dev->panel));
-    // Mirror to match 0xA1 (column remap) + 0xC8 (COM remap)
+    ret = esp_lcd_panel_reset(dev->panel);
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "Panel reset failed: %s", esp_err_to_name(ret));
+        esp_lcd_panel_del(dev->panel);
+        esp_lcd_panel_io_del(dev->io);
+        free(dev->buff);
+        dev->panel = NULL;
+        dev->io = NULL;
+        dev->buff = NULL;
+        return false;
+    }
+
+    ret = esp_lcd_panel_init(dev->panel);
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "Panel init failed: %s", esp_err_to_name(ret));
+        esp_lcd_panel_del(dev->panel);
+        esp_lcd_panel_io_del(dev->io);
+        free(dev->buff);
+        dev->panel = NULL;
+        dev->io = NULL;
+        dev->buff = NULL;
+        return false;
+    }
+
     esp_lcd_panel_mirror(dev->panel, true, true);
-    ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(dev->panel, true));
+    esp_lcd_panel_disp_on_off(dev->panel, true);
 
     ESP_LOGI(TAG, "Initialized %ux%u (esp_lcd backend)", width, height);
     return true;
