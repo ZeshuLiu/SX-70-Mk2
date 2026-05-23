@@ -27,3 +27,8 @@
 #define SOL2_PIN GPIO_NUM_13    // 光圈动作 高电平动作，初始化为低
 #define MOTOR_PIN GPIO_NUM_25   // 机身动作 高电平动作，初始化为低
 #define FF_PIN GPIO_NUM_32      // 闪光灯闪光 高电平动作，初始化为低
+
+// PCF8575 3D 按键引脚（位偏移，对应 RP2040 pins.h）
+#define PCF_BUTTON3D_DOWN   10  // 下键
+#define PCF_BUTTON3D_UP     8   // 上键
+#define PCF_BUTTON3D_PUSH   9   // 按下键

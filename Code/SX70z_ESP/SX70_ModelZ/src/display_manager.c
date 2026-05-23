@@ -3,6 +3,7 @@
 #include "PIN.h"
 #include "driver/gpio.h"
 #include <stdio.h>
+#include <math.h>
 
 void display_show_frame(const camera_state_t *state, ssd1306_t *disp)
 {
@@ -31,19 +32,29 @@ void display_show_frame(const camera_state_t *state, ssd1306_t *disp)
         ssd1306_draw_str(disp, 90, 2, "OFF", &font5x8_font);
     }
 
-    // 快门速度大字
-    ssd1306_draw_str(disp, 8, 18,
-                    get_shutter_speed(state->shutter_speed),
-                    &font5x8_font);
-
-    // 测光值（右下角）
-    char lux_str[16];
-    if (state->menu == 0) {
-        snprintf(lux_str, sizeof(lux_str), "L:%.2f", state->metering.last_lux);
-    } else {
-        snprintf(lux_str, sizeof(lux_str), "L:---");
+    // 快门速度大字（AUTO 模式下实时显示测光结果）
+    {
+        uint8_t disp_index = (state->menu == 0)
+            ? state->metering.auto_shutter_pos
+            : state->shutter_speed;
+        ssd1306_draw_str(disp, 8, 18,
+                        get_shutter_speed(disp_index),
+                        &font5x8_font);
     }
-    ssd1306_draw_str(disp, 75, 20, lux_str, &font5x8_font);
+
+    // 测光值（右下角，LUX 自适应小数位: 总数 6 位）
+    {
+        char info_str[32];
+        float lux = state->metering.last_lux;
+        int int_digits = (lux >= 1.0f) ? (int)log10f(lux) + 1 : 1;
+        if (lux < 0.0f) int_digits = 1;
+        int decimals = 6 - int_digits - 1;  // -1 for '.'
+        if (decimals < 0) decimals = 0;
+        if (decimals > 4) decimals = 4;
+        snprintf(info_str, sizeof(info_str), "EV%.1f L%.*f",
+                (double)state->metering.ev, decimals, (double)lux);
+        ssd1306_draw_str(disp, 50, 24, info_str, &font5x8_font);
+    }
 
     ssd1306_show(disp);
 }

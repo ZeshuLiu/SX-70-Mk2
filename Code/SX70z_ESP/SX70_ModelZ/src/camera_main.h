@@ -10,9 +10,20 @@
 #define CONTROL_TASK_PRIO   8   // 控制任务：高优先级（时序敏感）
 #define METERING_TASK_PRIO  3   // 测光任务：低优先级（1s 周期）
 
+/** 系统窗口衰减系数 — 校准 OPT4001 读数以匹配真实场景照度
+ *  raw_lux × METERING_ATTEN_K = 标定后 lux
+ *  大于 1.0 = 补偿衰减，小于 1.0 = 抑制过曝
+ *  调试方法：用独立测光表对比，调整此值直到 EV 读数一致
+ */
+#define METERING_ATTEN_K  256.0f
+
 // 测光参数
 typedef struct {
-    float last_lux;         // 上次测光值 (lux)
+    float last_lux;             // 上次测光值 (lux, 校准后 = raw × METERING_ATTEN_K)
+    float last_lux_raw;         // 原始 OPT4001 读数
+    float ev;                   // 校准后 EV (ISO 640)
+    float ev_raw;               // 原始 EV
+    uint8_t auto_shutter_pos;   // AUTO 模式计算的快门速度索引
 } metering_state_t;
 
 // 按键参数
@@ -56,3 +67,6 @@ void camera_resume(void);
 /** 快门速度表查询（供 display / shutter 模块使用） */
 const char *get_shutter_speed(uint8_t index);
 uint16_t get_shutter_time_x10(uint8_t index);
+
+/** 根据校准后 EV 计算快门速度索引 (F/8) */
+uint8_t calc_shutter_from_ev(float ev);

@@ -10,6 +10,8 @@
 #include "driver/gpio.h"
 #include "driver/ledc.h"
 #include "esp_task_wdt.h"
+#include <string.h>
+#include <math.h>
 
 static const char *TAG = "camera";
 
@@ -93,6 +95,7 @@ camera_state_t camera_state = {
     .if_display = false,
     .metering = {
         .last_lux = 0.0f,
+        .auto_shutter_pos = 5,  // 1/2s，安全起步
     },
     .button = {
         .available = false,
@@ -103,22 +106,24 @@ camera_state_t camera_state = {
     .menu = 0,
     .cam_mode = "AUTO",
     .shut_mode = '1',
-    .shutter_speed = 0,
+    .shutter_speed = 4,  // 1s
     .test_led_level = false,
 };
 
 /* ---- 快门速度表（移植自 SX70Mk2 metering.c） ---- */
-#define SHUTTER_SPEED_COUNT 22
+#define SHUTTER_SPEED_COUNT 26
 
 static const char *shutter_speeds[] = {
-    "1s", "1/2", "1/3", "1/4", "1/6", "1/8", "1/10", "1/15", "1/20",
+    "3s", "2.5s", "2s", "1.5s", "1s",
+    "1/2", "1/3", "1/4", "1/6", "1/8", "1/10", "1/15", "1/20",
     "1/30", "1/45", "1/60", "1/90", "1/125", "1/180", "1/250", "1/360",
     "1/500", "1/1000", "1/2000A", "1/2000B", "1/2000C"
 };
 
 // 快门时间 (0.1ms 单位)，对应上表
 static const uint16_t shutter_times_x10[] = {
-    10500, 5400, 4700, 3000, 2900, 1750, 1360, 970, 790,
+    30000, 25000, 20000, 15000, 10500,
+    5400, 4700, 3000, 2900, 1750, 1360, 970, 790,
     600, 520, 450, 410, 370, 340, 320, 280, 250, 230,
     225, 220, 215
 };
@@ -133,6 +138,67 @@ uint16_t get_shutter_time_x10(uint8_t index)
 {
     if (index >= SHUTTER_SPEED_COUNT) index = SHUTTER_SPEED_COUNT - 1;
     return shutter_times_x10[index];
+}
+
+// 根据校准后 EV 计算快门速度 (F/8 镜头)
+//
+// 原理: EV = log₂(F² / t) → t = F² / 2^EV = 64 / 2^EV
+// 阈值取相邻两档 EV 的中点 (即 t 的几何均值)
+//
+//  索引 | 快门   | 理论 EV | 阈值 EV
+//  ─────┼────────┼─────────┼────────
+//   0   | 3s     |  4.42   | ≤4.55
+//   1   | 2.5s   |  4.68   | ≤4.84
+//   2   | 2s     |  5.00   | ≤5.21
+//   3   | 1.5s   |  5.42   | ≤5.71
+//   4   | 1s     |  6.00   | ≤6.50
+//   5   | 1/2    |  7.00   | ≤7.29
+//   6   | 1/3    |  7.58   | ≤7.79
+//   7   | 1/4    |  8.00   | ≤8.29
+//   8   | 1/6    |  8.58   | ≤8.79
+//   9   | 1/8    |  9.00   | ≤9.16
+//  10   | 1/10   |  9.32   | ≤9.62
+//  11   | 1/15   |  9.91   | ≤10.12
+//  12   | 1/20   | 10.32   | ≤10.62
+//  13   | 1/30   | 10.91   | ≤11.20
+//  14   | 1/45   | 11.49   | ≤11.70
+//  15   | 1/60   | 11.91   | ≤12.20
+//  16   | 1/90   | 12.49   | ≤12.73
+//  17   | 1/125  | 12.96   | ≤13.23
+//  18   | 1/180  | 13.49   | ≤13.73
+//  19   | 1/250  | 13.96   | ≤14.23
+//  20   | 1/360  | 14.49   | ≤14.73
+//  21   | 1/500  | 14.96   | ≤15.46
+//  22   | 1/1000 | 15.96   | ≤16.46
+//  23   | 1/2000 | 16.96   | >16.46
+//
+// 返回快门速度索引 (0-23)
+uint8_t calc_shutter_from_ev(float ev)
+{
+    if (ev <= 4.55f) return 0;   // 3s
+    if (ev <= 4.84f) return 1;   // 2.5s
+    if (ev <= 5.21f) return 2;   // 2s
+    if (ev <= 5.71f) return 3;   // 1.5s
+    if (ev <= 6.50f) return 4;   // 1s
+    if (ev <= 7.29f) return 5;   // 1/2
+    if (ev <= 7.79f) return 6;   // 1/3
+    if (ev <= 8.29f) return 7;   // 1/4
+    if (ev <= 8.79f) return 8;   // 1/6
+    if (ev <= 9.16f) return 9;   // 1/8
+    if (ev <= 9.62f) return 10;  // 1/10
+    if (ev <= 10.12f) return 11; // 1/15
+    if (ev <= 10.62f) return 12; // 1/20
+    if (ev <= 11.20f) return 13; // 1/30
+    if (ev <= 11.70f) return 14; // 1/45
+    if (ev <= 12.20f) return 15; // 1/60
+    if (ev <= 12.73f) return 16; // 1/90
+    if (ev <= 13.23f) return 17; // 1/125
+    if (ev <= 13.73f) return 18; // 1/180
+    if (ev <= 14.23f) return 19; // 1/250
+    if (ev <= 14.73f) return 20; // 1/360
+    if (ev <= 15.46f) return 21; // 1/500
+    if (ev <= 16.46f) return 22; // 1/1000
+    return 23;                    // 1/2000
 }
 
 // GPIO 防抖（移植自 RP2040 原版：连续 N 采样确认）
@@ -169,6 +235,127 @@ static void debounce_read_s1pin(void)
     // S1F 半按对焦——当前硬件可能没有，预留
 }
 
+/* ---- 3D 按键处理（移植自 SX70Mk2 主循环 button3d_handler） ---- */
+
+// 读取 PCF8575 按键状态 -> "101" 格式（1=未按下，0=按下）
+static void read_3d_button_pins(char *result)
+{
+    if (!camera_state.button.available) {
+        result[0] = '1'; result[1] = '1'; result[2] = '1'; result[3] = '\0';
+        return;
+    }
+    uint16_t state = pcf8575_read(&gpio_expander);
+
+    result[0] = ((state >> PCF_BUTTON3D_DOWN) & 1) ? '1' : '0';
+    result[1] = ((state >> PCF_BUTTON3D_UP) & 1) ? '1' : '0';
+    result[2] = ((state >> PCF_BUTTON3D_PUSH) & 1) ? '1' : '0';
+    result[3] = '\0';
+}
+
+// 更新 cam_mode 字符串
+static void update_mode_display(void)
+{
+    if (camera_state.menu == 0) {
+        snprintf(camera_state.cam_mode, sizeof(camera_state.cam_mode), "AUTO");
+    } else if (camera_state.menu == 1) {
+        snprintf(camera_state.cam_mode, sizeof(camera_state.cam_mode), "B");
+    } else if (camera_state.menu == 2) {
+        snprintf(camera_state.cam_mode, sizeof(camera_state.cam_mode), "T");
+    } else if (camera_state.menu == 3) {
+        snprintf(camera_state.cam_mode, sizeof(camera_state.cam_mode), "%s",
+                get_shutter_speed(camera_state.shutter_speed));
+    } else if (camera_state.menu == 10) {
+        snprintf(camera_state.cam_mode, sizeof(camera_state.cam_mode), "---");
+    }
+}
+
+// 下键按下：M 档快门速度递减
+static void down_button_call(void)
+{
+    if (camera_state.menu == 3) {  // M 档
+        if (camera_state.shutter_speed == 0) {
+            camera_state.shutter_speed = SHUTTER_SPEED_COUNT - 1;
+        } else {
+            camera_state.shutter_speed--;
+        }
+    }
+    update_mode_display();
+}
+
+// 上键按下：M 档快门递增 / 自拍定时递增
+static void up_button_call(void)
+{
+    if (camera_state.menu == 3) {  // M 档
+        camera_state.shutter_speed = (camera_state.shutter_speed + 1) % SHUTTER_SPEED_COUNT;
+    }
+    update_mode_display();
+}
+
+// 短按"按下"键：菜单循环 AUTO→BULB→TIME→MANUAL→AUTO
+static void push_button_short(void)
+{
+    camera_state.menu = (camera_state.menu + 1) % 4;
+    update_mode_display();
+}
+
+// 长按"按下"键：进入/退出自拍定时
+static void push_button_long(void)
+{
+    if (camera_state.menu < 10) {
+        camera_state.menu = 10;
+    } else {
+        camera_state.menu = 0;
+    }
+    update_mode_display();
+}
+
+// 3D 按键处理（100ms 防抖，下降/上升沿检测，长短按区分）
+static void button3d_handler(void)
+{
+    if (!camera_state.button.available) return;
+
+    char bt[4];
+    read_3d_button_pins(bt);
+
+    // 100ms 防抖
+    uint32_t now = xTaskGetTickCount() * portTICK_PERIOD_MS;
+    if (now - camera_state.button.debounce_last < 100) {
+        return;
+    }
+
+    // 下键：下降沿触发 ('1'→'0')
+    if (camera_state.button.old_value[0] == '1' && bt[0] == '0') {
+        down_button_call();
+    }
+
+    // 上键：下降沿触发
+    if (camera_state.button.old_value[1] == '1' && bt[1] == '0') {
+        up_button_call();
+    }
+
+    // 按下键：记录按下时间
+    if (camera_state.button.old_value[2] == '1' && bt[2] == '0') {
+        camera_state.button.push_down_start = now;
+    }
+
+    // 按下键：松开时判断长短按
+    if (camera_state.button.old_value[2] == '0' && bt[2] == '1') {
+        uint32_t duration = now - camera_state.button.push_down_start;
+        if (duration > 1000) {
+            push_button_long();
+        } else {
+            push_button_short();
+        }
+    }
+
+    // 保存状态
+    camera_state.button.old_value[0] = bt[0];
+    camera_state.button.old_value[1] = bt[1];
+    camera_state.button.old_value[2] = bt[2];
+    camera_state.button.old_value[3] = '\0';
+    camera_state.button.debounce_last = now;
+}
+
 /* ---- 测光任务（低优先级，1s 周期） ---- */
 static void metering_task(void *pvParameters)
 {
@@ -184,9 +371,17 @@ static void metering_task(void *pvParameters)
     while (1) {
         float lux;
         if (opt4001_read_lux(&lux) == ESP_OK) {
+            camera_state.metering.last_lux_raw = lux;
+            camera_state.metering.ev_raw = log2f(lux * 2.56f);  // 原始 EV
+            lux *= METERING_ATTEN_K;          // 窗口衰减校准
             camera_state.metering.last_lux = lux;
+            camera_state.metering.ev = log2f(lux * 2.56f);  // 校准后 EV
+            camera_state.metering.auto_shutter_pos = calc_shutter_from_ev(camera_state.metering.ev);
+
             if (++opt_log_cnt % 5 == 0) {
-                ESP_LOGI(TAG, "OPT4001: %.4f lux", lux);
+                ESP_LOGI(TAG, "OPT4001: raw=%.1f cal=%.1f EV=%.1f, shutter=%s",
+                        camera_state.metering.last_lux_raw, lux, camera_state.metering.ev,
+                        get_shutter_speed(camera_state.metering.auto_shutter_pos));
             }
         }
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -402,6 +597,9 @@ void control_task(void *pvParameters)
                             SHUTTER_TASK_PRIO, &shutter_task_handle, 1);
 
     while (1) {
+        // 3D 按键处理
+        button3d_handler();
+
         // 闪光灯检测（带防抖）
         static int flash_debounce = 0;
         bool flash_connected = (gpio_get_level(S2_PIN) == 0);
@@ -423,6 +621,10 @@ void control_task(void *pvParameters)
         // S1T 全按快门 → 触发快门任务（参考 if s1t_pressed == 1）
         if (! s1t_pressed) {
             if (camera_state.menu != 10) {
+                // AUTO 模式：自动选择测光计算的快门速度
+                if (camera_state.menu == 0) {
+                    camera_state.shutter_speed = camera_state.metering.auto_shutter_pos;
+                }
                 xTaskNotifyGive(shutter_task_handle);
             }
         }
@@ -436,8 +638,13 @@ void control_task(void *pvParameters)
                     camera_state.cam_mode, camera_state.metering.last_lux);
         }
 
-        camera_state.test_led_level = !camera_state.test_led_level;
-        gpio_set_level(LED1_PIN, camera_state.test_led_level);
+        // 无屏幕时 LED 心跳指示，有屏幕则保持熄灭
+        if (!camera_state.if_display) {
+            camera_state.test_led_level = !camera_state.test_led_level;
+            gpio_set_level(LED1_PIN, camera_state.test_led_level);
+        } else {
+            gpio_set_level(LED1_PIN, 1);  // LED 低电平点亮，1=灭
+        }
         vTaskDelay(pdMS_TO_TICKS(100));
     }
 }

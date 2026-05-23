@@ -13,7 +13,7 @@ Polaroid SX-70 相机控制器，基于 ESP32-PICO-V3 (4MB Flash, 无 PSRAM)，�
 ## Build & Flash
 
 ```bash
-idf.py build                      # 编译
+idf.py build                      # 编译（build/ 下同时生成带时间戳的副本 bin）
 idf.py -p <PORT> flash            # 烧录 (UART, QIO 80MHz)
 idf.py -p <PORT> monitor          # 串口监视 (UART0, 115200 baud)
 idf.py -p <PORT> erase-flash flash monitor
@@ -85,7 +85,7 @@ app_main() [Core 0]
         ├─ 创建 metering_task (prio 3) — OPT4001 初始化 + 1s 周期测光
         ├─ 初始化 GPTimer — us 级精确定时 (1MHz, intr_priority=1 绑定 Core 1)
         ├─ 创建 shutter_task (prio 10) — 平时阻塞，xTaskNotifyGive 触发
-        └─ 主循环：S2 检测 + LED 闪烁 (1s)
+        └─ 主循环：S2 检测 + AUTO 快门更新 + LED 闪烁 (100ms)
   9. app_main 空闲循环（打印 RSSI 等辅助信息）
 ```
 
@@ -218,17 +218,47 @@ IP_EVENT_STA_GOT_IP → ota_web_start()
 
 ```
 camera_state_t
-├── if_display                  OLED 是否可用
+├── if_display                  OLED 是否可用（可用时 LED 保持熄灭）
 ├── metering_state_t metering   测光参数
-│   └── last_lux                OPT4001 最新测光值
+│   ├── last_lux                校准后 lux（= raw × METERING_ATTEN_K）
+│   ├── last_lux_raw            OPT4001 原始读数
+│   ├── ev                      校准后 EV（ISO 640）
+│   ├── ev_raw                  原始 EV
+│   └── auto_shutter_pos        AUTO 模式计算的快门速度索引
 ├── button_state_t button       按键参数
 │   ├── available               PCF8575 是否可用
 │   ├── old_value[4]            上次按键状态（"111" 格式）
 │   ├── debounce_last           防抖计时 (ms)
 │   └── push_down_start         按下计时 (ms)
 ├── menu / cam_mode / shut_mode / shutter_speed  曝光/模式参数
-└── test_led_level              调试 LED 电平
+└── test_led_level              调试 LED 电平（仅 OLED 不可用时闪烁）
 ```
+
+### 3D 按键处理（PCF8575）
+
+移植自 `SX70Mk2/SX70Mk2.c` 的 `button3d_handler`，通过 PCF8575 I2C GPIO 扩展读取 3 个物理按键（上/下/按下）。
+
+**按键引脚**（`PIN.h`）：`PCF_BUTTON3D_DOWN=10`, `PCF_BUTTON3D_UP=8`, `PCF_BUTTON3D_PUSH=9`
+
+**核心函数**：
+- `read_3d_button_pins(char *result)` — 读 PCF8575 16 位状态，提取按键位到 `"101"` 字符串
+- `button3d_handler()` — 100ms 防抖 + 下降沿/上升沿检测 + 长短按区分（>1000ms）
+- `down_button_call()` — M 档快门速度递减（环形，0→21→0）
+- `up_button_call()` — M 档快门速度递增
+- `push_button_short()` — 菜单循环：AUTO(0)→BULB(1)→TIME(2)→MANUAL(3)→AUTO(0)
+- `push_button_long()` — 进入/退出自拍定时（menu=10）
+- `update_mode_display()` — 根据 `menu` 更新 `cam_mode` 字符串
+
+**菜单结构**：
+| menu | 模式 | cam_mode | 快门来源 |
+|------|------|----------|---------|
+| 0 | AUTO | "AUTO" | auto_shutter_pos (测光自动) |
+| 1 | BULB | "B" | B 门（S1T 释放结束） |
+| 2 | TIME | "T" | T 门（S1T 按两次） |
+| 3 | MANUAL | 快门速度字符串 | 手动选择（上/下键） |
+| 10 | 自拍定时 | "---" | 禁止拍摄 |
+
+**主循环调用**：`control_task` 每 100ms 调 `button3d_handler()`，在闪光灯检测之前。
 
 ### us 级精确定时 (`delay_us`)
 
@@ -247,6 +277,47 @@ camera_state_t
 xTaskNotifyGive(shutter_task_handle);
 // shutter_task 立即抢占 Core 1，执行完回到阻塞态
 ```
+
+### 测光标定与曝光计算
+
+**标定流程**：
+1. OPT4001 读原始 lux → `last_lux_raw`
+2. `raw_lux × METERING_ATTEN_K` → `last_lux`（校准后 lux）
+3. `EV = log₂(last_lux × 2.56)` → `ev`（ISO 640 下的 EV）
+4. `calc_shutter_from_ev(ev)` → `auto_shutter_pos`
+
+**`METERING_ATTEN_K`**（`camera_main.h`）：机身窗口衰减系数。调试时对比独立测光表，调整此值直到两者 EV 一致。当前设为 256.0f。
+
+**`calc_shutter_from_ev(float ev)`** — 根据校准后 EV 查表返回快门速度索引 (0-21)。
+
+原理：F/8 镜头，`EV = log₂(64 / t)`，阈值取相邻两档 EV 中点。
+
+| 索引 | 快门 | 理论 EV | 阈值 EV |
+|------|------|---------|---------|
+| 0 | 3s | 4.42 | ≤4.55 |
+| 1 | 2.5s | 4.68 | ≤4.84 |
+| 2 | 2s | 5.00 | ≤5.21 |
+| 3 | 1.5s | 5.42 | ≤5.71 |
+| 4 | 1s | 6.00 | ≤6.50 |
+| 5 | 1/2 | 7.00 | ≤7.29 |
+| 6 | 1/3 | 7.58 | ≤7.79 |
+| 7 | 1/4 | 8.00 | ≤8.29 |
+| 8 | 1/6 | 8.58 | ≤8.79 |
+| 9 | 1/8 | 9.00 | ≤9.16 |
+| 10 | 1/10 | 9.32 | ≤9.62 |
+| 11 | 1/15 | 9.91 | ≤10.12 |
+| ... | ... | ... | ... |
+| 22 | 1/1000 | 15.96 | ≤16.46 |
+| 23 | 1/2000 | 16.96 | >16.46 |
+
+**AUTO 模式流程**：
+1. `metering_task` (1s 周期) → `auto_shutter_pos`
+2. `control_task` 检测 S1T + `menu==0` → `shutter_speed = auto_shutter_pos`
+3. `shutter_task` 用 `shutter_speed` 查 `shutter_times_x10` 表获得曝光时间
+
+**全模式 EV/LUX 显示**（`display_manager.c`）：OLED 右下角显示 `EV13.6 L430.12`，LUX 小数位自适应（6 位总宽，整数位多则小数少）。快门速度大字在 AUTO 模式实时反映测光结果。
+
+非 AUTO 模式（BULB/TIME/MANUAL）下 `shutter_speed` 由用户手动选择，不受测光影响。
 
 - `src/` 通过 `EXTRA_COMPONENT_DIRS` 注册为独立组件，新增 .c 文件需在 `src/CMakeLists.txt` 的 SRCS 中添加
 - 新增组件依赖时注意 CMake 组件名 vs 头文件名不一致（如 `esp_ota_ops.h` → `app_update`）
