@@ -32,7 +32,7 @@ uint16_t pcf8575_read(pcf8575_t *dev) {
     uint8_t buf[2];
 
     esp_err_t ret = i2c_master_read_from_device(dev->i2c_port, dev->i2c_addr,
-                                                 buf, 2, pdMS_TO_TICKS(100));
+                                                buf, 2, pdMS_TO_TICKS(100));
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Read failed: %s", esp_err_to_name(ret));
         return 0xFFFF;
@@ -52,7 +52,7 @@ void pcf8575_write(pcf8575_t *dev, uint16_t value) {
     dev->pin_state = output_value;
 
     i2c_master_write_to_device(dev->i2c_port, dev->i2c_addr,
-                               buf, 2, pdMS_TO_TICKS(100));
+                                buf, 2, pdMS_TO_TICKS(100));
 }
 
 void pcf8575_set_output(pcf8575_t *dev, uint8_t pin) {
