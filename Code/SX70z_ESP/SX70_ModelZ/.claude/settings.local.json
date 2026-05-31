@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Read(//d/ESPIDF/v5.5.2/esp-idf/**)",
-      "Read(//e/Develop/SX-70-Mk2/**)"
+      "Read(//e/Develop/SX-70-Mk2/**)",
+      "mcp__zotero-mcp__search_library"
     ]
   }
 }
